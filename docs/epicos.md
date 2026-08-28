@@ -46,7 +46,6 @@
 | 17 | Alta | Como usuário, quero visualizar um feed com as atividades de quem eu sigo, para que eu descubra novos jogos através da comunidade. | REQ-13 | 🔲 |
 | 18 | Média | Como usuário, quero curtir e comentar em reviews de outros usuários, para que eu interaja com a comunidade. | REQ-14 | 🔲 |
 | 19 | Média | Como usuário, quero receber notificações de atividades relevantes, para que eu me mantenha engajado na plataforma. | REQ-15 | 🔲 |
-| 22 | Média | Como usuário, quero denunciar uma review ou comentário impróprio, para que a comunidade se mantenha saudável. | REQ-22 | 🔲 |
 | 24 | Baixa | Como usuário, quero responder a um comentário específico, para que eu participe de uma conversa dentro da review. | REQ-24 | 🔲 |
 
 
