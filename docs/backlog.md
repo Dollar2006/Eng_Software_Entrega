@@ -43,7 +43,6 @@
 | 19 | Média | Como usuário, quero receber notificações de atividades relevantes, para que eu me mantenha engajado na plataforma. | REQ-15 | 🔲 |
 | 20 | Alta | Como usuário, quero que novos jogos sejam sugeridos automaticamente conforme eu rolo a tela, com base nos jogos/tags que acessei ou avaliei anteriormente, para que eu descubra títulos parecidos sem precisar buscar. | REQ-20 | 🔲 |
 | 21 | Média | Como usuário, quero filtrar e ordenar os resultados de busca (nota, gênero, lançamento, mais avaliados), para que eu encontre jogos mais relevantes. | REQ-21 | 🔲 |
-| 22 | Média | Como usuário, quero denunciar uma review ou comentário impróprio, para que a comunidade se mantenha saudável. | REQ-22 | 🔲 |
-| 24 | Baixa | Como usuário, quero responder a um comentário específico, para que eu participe de uma conversa dentro da review. | REQ-24 | 🔲 |
-| 25 | Baixa | Como usuário, quero ver um ranking dos jogos mais bem avaliados da plataforma, para que eu descubra os títulos mais aclamados pela comunidade. | REQ-25 | 🔲 |
+| 22 | Baixa | Como usuário, quero responder a um comentário específico, para que eu participe de uma conversa dentro da review. | REQ-24 | 🔲 |
+| 23 | Baixa | Como usuário, quero ver um ranking dos jogos mais bem avaliados da plataforma, para que eu descubra os títulos mais aclamados pela comunidade. | REQ-25 | 🔲 |
 
