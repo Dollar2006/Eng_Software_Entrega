@@ -1,3 +1,6 @@
+from typing import Literal
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -8,7 +11,16 @@ class Settings(BaseSettings):
     supabase_anon_key: str
     frontend_url: str = "http://localhost:5173"
     auth_cookie_secure: bool = False
-    auth_cookie_samesite: str = "lax"
+    auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"
+
+    @model_validator(mode="after")
+    def _validate_auth_cookie(self) -> "Settings":
+        if self.auth_cookie_samesite == "none" and not self.auth_cookie_secure:
+            raise ValueError(
+                "AUTH_COOKIE_SAMESITE=none exige AUTH_COOKIE_SECURE=true: "
+                "o navegador rejeita SameSite=None sem HTTPS."
+            )
+        return self
 
     class Config:
         env_file = ".env"

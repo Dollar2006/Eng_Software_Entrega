@@ -83,6 +83,20 @@ class SupabaseAuthService:
             refresh_token=response.session.refresh_token,
         )
 
+    def refresh(self, refresh_token: str) -> AuthSession:
+        try:
+            response = self.client.auth.refresh_session(refresh_token)
+        except Exception as error:
+            raise AuthProviderError("Sessão expirada", 401) from error
+
+        if response.session is None:
+            raise AuthProviderError("Sessão expirada", 401)
+        return AuthSession(
+            user=self._user_response(response.user),
+            access_token=response.session.access_token,
+            refresh_token=response.session.refresh_token,
+        )
+
     def current_user(self, access_token: str) -> dict[str, str]:
         try:
             response = self.client.auth.get_user(access_token)

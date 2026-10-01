@@ -58,6 +58,18 @@ def login(credentials: AuthCredentials, response: Response):
     return {"user": session.user}
 
 
+@router.post("/refresh", response_model=AuthResponse)
+def refresh(response: Response, refresh_token: str | None = Cookie(default=None)):
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Sessão expirada")
+    try:
+        session = auth_service.refresh(refresh_token)
+    except AuthProviderError as error:
+        _raise_provider_error(error)
+    _set_session_cookies(response, session.access_token, session.refresh_token)
+    return {"user": session.user}
+
+
 @router.get("/me", response_model=AuthResponse)
 def me(access_token: str | None = Cookie(default=None)):
     if not access_token:
