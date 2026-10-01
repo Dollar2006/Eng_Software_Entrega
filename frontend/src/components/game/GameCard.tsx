@@ -1,9 +1,10 @@
-import type { Game } from "@/lib/games";
-import { label } from "@/lib/labels";
+import { Link } from 'react-router'
+import type { Game } from '@/lib/games'
+import { label } from '@/lib/labels'
 
 export default function GameCard({ game }: { game: Game }) {
   return (
-    <article className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+    <article className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white transition-colors hover:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900">
       <div className="grid h-32 place-items-center bg-neutral-100">
         {game.cover_url ? (
           <img
@@ -22,7 +23,15 @@ export default function GameCard({ game }: { game: Game }) {
       </div>
 
       <div className="space-y-2 p-4">
-        <h3 className="text-sm font-semibold text-neutral-900">{game.name}</h3>
+        <h3 className="text-sm font-semibold text-neutral-900">
+          {/* O after:inset-0 estica o link para o card inteiro ficar clicável */}
+          <Link
+            to={`/jogos/${game.id}`}
+            className="outline-none after:absolute after:inset-0"
+          >
+            {game.name}
+          </Link>
+        </h3>
 
         <ul className="flex flex-wrap gap-1.5">
           {game.genres.slice(0, 3).map((g) => (
@@ -34,11 +43,7 @@ export default function GameCard({ game }: { game: Game }) {
             </li>
           ))}
         </ul>
-
-        <p className="text-xs text-neutral-500">
-          {game.platforms.map(label).join(", ")}
-        </p>
       </div>
     </article>
-  );
+  )
 }
