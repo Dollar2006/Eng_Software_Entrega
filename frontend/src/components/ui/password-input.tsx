@@ -13,9 +13,9 @@ function PasswordInput({
   return (
     <div className="relative w-full">
       <Input
+        {...props}
         className={cn("bg-background pr-10", className)}
         type={showPassword ? "text" : "password"}
-        {...props}
       />
       <Button
         aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
