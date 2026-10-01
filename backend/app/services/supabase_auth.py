@@ -2,8 +2,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from supabase import Client, create_client
+from supabase_auth.errors import AuthApiError
 
 from app.config import settings
+
+EMAIL_ALREADY_REGISTERED_CODE = "user_already_exists"
 
 
 class AuthProviderError(Exception):
@@ -20,6 +23,12 @@ class AuthSession:
     refresh_token: str
 
 
+@dataclass(frozen=True)
+class Registration:
+    user: dict[str, str]
+    session: AuthSession | None
+
+
 class SupabaseAuthService:
     def __init__(self, client: Client | None = None):
         self.client = client or create_client(
@@ -32,14 +41,31 @@ class SupabaseAuthService:
             raise AuthProviderError("O provedor não retornou um usuário válido")
         return {"id": str(user.id), "email": str(user.email)}
 
-    def register(self, email: str, password: str) -> dict[str, str]:
+    def register(self, email: str, password: str) -> Registration:
         try:
             response = self.client.auth.sign_up(
                 {"email": email, "password": password}
             )
+        except AuthApiError as error:
+            if error.code == EMAIL_ALREADY_REGISTERED_CODE:
+                raise AuthProviderError("Este e-mail já está cadastrado", 409) from error
+            raise AuthProviderError("Não foi possível criar a conta", 400) from error
         except Exception as error:
             raise AuthProviderError("Não foi possível criar a conta", 400) from error
-        return self._user_response(response.user)
+
+        user = self._user_response(response.user)
+
+        if response.session is None:
+            return Registration(user=user, session=None)
+
+        return Registration(
+            user=user,
+            session=AuthSession(
+                user=user,
+                access_token=response.session.access_token,
+                refresh_token=response.session.refresh_token,
+            ),
+        )
 
     def login(self, email: str, password: str) -> AuthSession:
         try:
