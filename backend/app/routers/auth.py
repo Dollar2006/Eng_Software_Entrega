@@ -31,12 +31,21 @@ def _set_session_cookies(response: Response, access_token: str, refresh_token: s
     response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def register(credentials: AuthCredentials):
+def register(credentials: AuthCredentials, response: Response):
     try:
-        user = auth_service.register(credentials.email, credentials.password)
+        registration = auth_service.register(credentials.email, credentials.password)
     except AuthProviderError as error:
         _raise_provider_error(error)
-    return {"user": user}
+
+    if registration.session is not None:
+        session = registration.session
+        _set_session_cookies(response, session.access_token, session.refresh_token)
+        return {"user": registration.user}
+
+    return {
+        "user": registration.user,
+        "email_confirmation_required": True,
+    }
 
 
 @router.post("/login", response_model=AuthResponse)
