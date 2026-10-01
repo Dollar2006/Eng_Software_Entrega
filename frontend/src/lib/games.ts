@@ -38,3 +38,17 @@ export async function getFilterOptions(): Promise<FilterOptions> {
   if (!res.ok) throw new Error("Erro ao buscar filtros");
   return res.json();
 }
+
+export interface GameDetail extends Game {
+  description: string | null;
+}
+
+export class GameNotFoundError extends Error {}
+
+export async function getGame(id: string): Promise<GameDetail> {
+  const res = await fetch(`${API_URL}/games/${id}`);
+  // 422 acontece quando o id não é um número (ex.: /jogos/abc)
+  if (res.status === 404 || res.status === 422) throw new GameNotFoundError();
+  if (!res.ok) throw new Error("Erro ao buscar o jogo");
+  return res.json();
+}

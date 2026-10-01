@@ -3,6 +3,7 @@ import App from '@/App'
 import ErrorPage from '@/pages/ErrorPage'
 import HomePage from '@/pages/HomePage'
 import Bonfirehub from '@/pages/Bonfirehub'
+import GameDetailsPage from '@/pages/GameDetailsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       {path: 'bonfirehub', element: <Bonfirehub />},
+      {path: 'jogos/:id', element: <GameDetailsPage />},
       { path: '*', element: <NotFoundPage /> },
     ],
   },

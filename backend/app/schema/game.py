@@ -11,3 +11,5 @@ class GameOut(BaseModel):
 class FiltersOut(BaseModel):
     genres: list[str]
     platforms: list[str]
+class GameDetailOut(GameOut):
+    description: str | None = None
