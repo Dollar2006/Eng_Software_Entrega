@@ -110,7 +110,7 @@ export default function SettingsLayout() {
           </div>
 
           <div className="min-w-0">
-            <Outlet />
+            <Outlet context={{ user } satisfies SessionData} />
           </div>
         </div>
       </div>
