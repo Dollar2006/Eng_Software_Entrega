@@ -26,9 +26,6 @@ export default function HomePage() {
   const [session, setSession] = useState<SessionState>({ status: 'loading' })
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  // /auth/me devolve 401 quando o access_token expirou; o interceptor em
-  // lib/api.ts tenta o refresh antes disso chegar aqui, entao chegar em
-  // 'anonymous' significa que a sessao nao pode mais ser renovada.
   useEffect(() => {
     let active = true
 
@@ -56,8 +53,7 @@ export default function HomePage() {
       await logoutAccount()
       setSession({ status: 'anonymous' })
     } catch {
-      // O logout e local-only: mesmo se a chamada falhar, os cookies foram
-      // limpos no navegador e a sessao visualmente termina aqui.
+      // Se a chamada falhar, os cookies foram limpos no client e a sessao termina aqui.
       setSession({ status: 'anonymous' })
     } finally {
       setIsLoggingOut(false)
@@ -86,7 +82,10 @@ export default function HomePage() {
                 </AlertDescription>
               </Alert>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex-col gap-2">
+              <Button asChild className="w-full cursor-pointer">
+                <Link to="/settings">Configurações</Link>
+              </Button>
               <Button
                 className="w-full cursor-pointer"
                 disabled={isLoggingOut}
