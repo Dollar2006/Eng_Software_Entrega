@@ -43,6 +43,10 @@ export default function GameCard({ game }: { game: Game }) {
             </li>
           ))}
         </ul>
+
+        <p className="text-xs text-neutral-500">
+          {game.platforms.map(label).join(', ')}
+        </p>
       </div>
     </article>
   )

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { GameNotFoundError, getGame, type GameDetail } from '@/lib/games'
+import RateGame from '@/components/game/RateGame'
 import { label } from '@/lib/labels'
 
 type State =
@@ -37,6 +38,13 @@ export function GameDetailsPage() {
       cancelled = true
     }
   }, [id])
+
+  // Atualiza só os dados do jogo (média), sem voltar para a tela de carregando.
+  function refreshGame() {
+    getGame(id)
+      .then((game) => setState({ status: 'ok', game }))
+      .catch(() => {})
+  }
 
   return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -120,6 +128,16 @@ export function GameDetailsPage() {
                     </li>
                   ))}
                 </ul>
+              </section>
+
+              <section>
+                <h2 className={sectionTitleClass}>Avaliação</h2>
+                <p className="mb-3 text-sm text-neutral-700">
+                  {state.game.rating_avg !== null
+                    ? `${state.game.rating_avg.toFixed(1)} de 5 · ${state.game.rating_count} ${state.game.rating_count === 1 ? 'avaliação' : 'avaliações'}`
+                    : 'Ainda sem avaliações.'}
+                </p>
+                <RateGame gameId={id} onRated={refreshGame} />
               </section>
 
               <section>

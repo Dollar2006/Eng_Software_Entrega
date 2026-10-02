@@ -7,6 +7,7 @@ from alembic import context
 from app.config import settings
 from app.db.database import Base
 from app.models.game import Game  # noqa: F401
+from app.models.review import Review
 
 config = context.config
 

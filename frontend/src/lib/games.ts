@@ -1,3 +1,5 @@
+import { api } from "@/lib/api";
+
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 export interface Game {
@@ -41,6 +43,8 @@ export async function getFilterOptions(): Promise<FilterOptions> {
 
 export interface GameDetail extends Game {
   description: string | null;
+  rating_avg: number | null;
+  rating_count: number;
 }
 
 export class GameNotFoundError extends Error {}
@@ -51,4 +55,19 @@ export async function getGame(id: string): Promise<GameDetail> {
   if (res.status === 404 || res.status === 422) throw new GameNotFoundError();
   if (!res.ok) throw new Error("Erro ao buscar o jogo");
   return res.json();
+}
+
+// As rotas de nota exigem sessão. Sem login o backend responde 401 e o `api`
+// lança ApiError com status 401 (mesmo caminho do requireSession).
+
+// Nota do usuário logado neste jogo (null = ainda não avaliou).
+export async function getMyRating(id: string | number): Promise<number | null> {
+  const response = await api.get<{ rating: number | null }>(
+    `/games/${id}/rating/me`,
+  );
+  return response.data.rating;
+}
+
+export async function rateGame(id: string | number, rating: number): Promise<void> {
+  await api.put(`/games/${id}/rating`, { rating });
 }
