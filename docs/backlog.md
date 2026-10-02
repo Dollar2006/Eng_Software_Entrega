@@ -6,17 +6,16 @@
 | :--: | :--------: | --- | :--: | :--: |
 | 1 | Alta | Como visitante, quero me cadastrar na plataforma com e-mail e senha, para que eu possa criar uma conta e acessar o sistema. | REQ-01 | 🔲 |
 | 2 | Alta | Como usuário, quero fazer login e logout de forma segura, para que meus dados fiquem protegidos. | REQ-02 | 🔲 |
-| 3 | Média | Como usuário, quero recuperar/redefinir minha senha caso eu a esqueça, para que eu não perca o acesso à minha conta. | REQ-16 | 🔲 |
-| 4 | Média | Como usuário, quero criar e personalizar meu perfil (foto e bio), para que outros usuários me conheçam. | REQ-03 | 🔲 |
-| 5 | Baixa | Como usuário, quero editar os dados da minha conta (e-mail, senha), para que eu mantenha minhas informações atualizadas. | REQ-17 | 🔲 |
-| 6 | Alta | Como usuário, quero marcar jogos como "Jogados", "Pretendo Jogar" e "Biblioteca" no meu perfil, para que eu organize meu histórico, minha lista de desejos e jogos que possuo. | REQ-04 | 🔲 |
-| 7 | Alta | Como usuário, quero pesquisar jogos por nome, gênero ou plataforma, para que eu encontre facilmente títulos de interesse. | REQ-05 | 🔲 |
-| 8 | Alta | Como usuário, quero visualizar a página de detalhes de um jogo, para que eu conheça mais sobre o título antes de jogar. | REQ-06 | 🔲 |
-| 9 | Alta | Como usuário, quero avaliar um jogo com notas de 1 a 5 estrelas, para que eu expresse minha opinião de forma rápida. | REQ-07 | 🔲 |
-| 10 | Alta | Como usuário, quero escrever uma review detalhada sobre um jogo, para que eu compartilhe minha experiência com a comunidade. | REQ-08 | 🔲 |
-| 11 | Média | Como usuário, quero editar ou excluir minhas próprias avaliações e reviews, para que eu possa corrigir ou atualizar minha opinião. | REQ-09 | 🔲 |
-| 12 | Média | Como usuário, quero criar listas personalizadas de jogos, para que eu organize e compartilhe minhas curadorias. | REQ-10 | 🔲 |
-| 13 | Média | Como usuário, quero adicionar ou remover jogos de minhas listas, para que eu mantenha minhas curadorias sempre atualizadas. | REQ-11 | 🔲 |
+| 3 | Alta | Como usuário, quero marcar jogos como "Jogados", "Pretendo Jogar" e "Biblioteca" no meu perfil, para que eu organize meu histórico, minha lista de desejos e jogos que possuo. | REQ-04 | 🔲 |
+| 4 | Alta | Como usuário, quero pesquisar jogos por nome, gênero ou plataforma, para que eu encontre facilmente títulos de interesse. | REQ-05 | 🔲 |
+| 5 | Alta | Como usuário, quero visualizar a página de detalhes de um jogo, para que eu conheça mais sobre o título antes de jogar. | REQ-06 | 🔲 |
+| 6 | Alta | Como usuário, quero avaliar um jogo com notas de 1 a 5 estrelas, para que eu expresse minha opinião de forma rápida. | REQ-07 | 🔲 |
+| 7 | Alta | Como usuário, quero escrever uma review detalhada sobre um jogo, para que eu compartilhe minha experiência com a comunidade. | REQ-08 | 🔲 |
+| 8 | Média | Como usuário, quero editar ou excluir minhas próprias avaliações e reviews, para que eu possa corrigir ou atualizar minha opinião. | REQ-09 | 🔲 |
+| 9 | Média | Como usuário, quero criar listas personalizadas de jogos, para que eu organize e compartilhe minhas curadorias. | REQ-10 | 🔲 |
+| 10 | Média | Como usuário, quero adicionar ou remover jogos de minhas listas, para que eu mantenha minhas curadorias sempre atualizadas. | REQ-11 | 🔲 |
+| 11 | Média | Como usuário, quero criar e personalizar meu perfil (foto e bio), para que outros usuários me conheçam. | REQ-03 | 🔲 |
+| 12 | Baixa | Como usuário, quero editar os dados da minha conta (e-mail, senha), para que eu mantenha minhas informações atualizadas. | REQ-17 | 🔲 |
 
 
 **Entrega da sprint:** cadastro/login funcionando, perfil editável, catálogo de jogos pesquisável e sistema de avaliação.
