@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import GameCard from "../components/game/GameCard";
+import { useEffect, useRef, useState } from "react";
+import GameCard from "@/components/game/GameCard";
 import {
   getFilterOptions,
   searchGames,
   type FilterOptions,
   type Game,
-} from "../lib/games";
-import { label } from "../lib/labels";
+} from "@/lib/games";
+import { label } from "@/lib/labels";
 
 const PAGE_SIZE = 12;
 const ERROR_MSG =
@@ -27,15 +27,19 @@ export function Bonfirehub() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(false);
+  const optionsRequested = useRef(false);
 
-  // Opções dos selects vêm do banco, não de listas fixas no front.
-  useEffect(() => {
+  function loadOptions() {
+    if (optionsRequested.current) return;
+    optionsRequested.current = true;
     getFilterOptions()
       .then(setOptions)
-      .catch(() => setError(ERROR_MSG));
-  }, []);
+      .catch(() => {
+        optionsRequested.current = false; // permite tentar de novo
+        setError(ERROR_MSG);
+      });
+  }
 
-  // Busca com debounce: espera 300 ms depois da última digitação/filtro.
   useEffect(() => {
     let cancelled = false;
     const timer = setTimeout(async () => {
@@ -93,7 +97,10 @@ export function Bonfirehub() {
           </p>
         </header>
 
-        <section className="mb-8 rounded-xl border border-neutral-200 bg-white p-4">
+        <section
+          onMouseEnter={loadOptions}
+          className="mb-8 rounded-xl border border-neutral-200 bg-white p-4"
+        >
           <div className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr]">
             <input
               type="search"
@@ -106,6 +113,7 @@ export function Bonfirehub() {
 
             <select
               aria-label="Filtrar por gênero"
+              onFocus={loadOptions}
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
               className={fieldClass}
@@ -120,6 +128,7 @@ export function Bonfirehub() {
 
             <select
               aria-label="Filtrar por plataforma"
+              onFocus={loadOptions}
               value={platform}
               onChange={(e) => setPlatform(e.target.value)}
               className={fieldClass}

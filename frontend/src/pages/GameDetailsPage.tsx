@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { GameNotFoundError, getGame, type GameDetail } from '@/lib/games'
+import RateGame from '@/components/game/RateGame'
+import ReviewList from '@/components/game/ReviewList'
 import { label } from '@/lib/labels'
 
 type State =
@@ -17,6 +19,8 @@ const sectionTitleClass =
 export function GameDetailsPage() {
   const { id = '' } = useParams()
   const [state, setState] = useState<State>({ status: 'loading' })
+  // Muda quando o usuário publica uma review, para a lista recarregar.
+  const [reviewsVersion, setReviewsVersion] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -37,6 +41,18 @@ export function GameDetailsPage() {
       cancelled = true
     }
   }, [id])
+
+  // Atualiza só os dados do jogo (média), sem voltar para a tela de carregando.
+  function refreshGame() {
+    getGame(id)
+      .then((game) => setState({ status: 'ok', game }))
+      .catch(() => {})
+  }
+
+  function handleReviewed() {
+    refreshGame()
+    setReviewsVersion((v) => v + 1)
+  }
 
   return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -79,6 +95,7 @@ export function GameDetailsPage() {
         )}
 
         {state.status === 'ok' && (
+          <>
           <article className="mt-6 overflow-hidden rounded-xl border border-neutral-200 bg-white md:grid md:grid-cols-[320px_1fr]">
             <div className="grid h-64 place-items-center bg-neutral-100 md:h-full">
               {state.game.cover_url ? (
@@ -123,6 +140,20 @@ export function GameDetailsPage() {
               </section>
 
               <section>
+                <h2 className={sectionTitleClass}>Avaliação</h2>
+                <p className="mb-3 text-sm text-neutral-700">
+                  {state.game.rating_avg !== null
+                    ? `${state.game.rating_avg.toFixed(1)} de 5 · ${state.game.rating_count} ${state.game.rating_count === 1 ? 'avaliação' : 'avaliações'}`
+                    : 'Ainda sem avaliações.'}
+                </p>
+                <RateGame
+                  gameId={id}
+                  onRated={refreshGame}
+                  onReviewed={handleReviewed}
+                />
+              </section>
+
+              <section>
                 <h2 className={sectionTitleClass}>Sobre</h2>
                 <p className="text-sm leading-relaxed text-neutral-700">
                   {state.game.description ?? 'Este jogo ainda não tem descrição.'}
@@ -130,6 +161,14 @@ export function GameDetailsPage() {
               </section>
             </div>
           </article>
+
+          <section className="mt-8">
+            <h2 className="mb-4 text-lg font-semibold">
+              Reviews da comunidade
+            </h2>
+            <ReviewList gameId={id} refreshKey={reviewsVersion} />
+          </section>
+          </>
         )}
       </div>
     </main>
