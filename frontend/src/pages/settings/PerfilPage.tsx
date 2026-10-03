@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router'
-import { IconCircleCheckFilled, IconPencil } from '@tabler/icons-react'
+import { IconAlertCircleFilled, IconCircleCheckFilled, IconPencil } from '@tabler/icons-react'
 
 import Avatar from '@/components/profile/Avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -14,40 +14,75 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import type { SessionData } from '@/features/auth/requireSession'
-import ProfileForm, { type ProfileDraft } from '@/features/profile/ProfileForm'
+import ProfileForm from '@/features/profile/ProfileForm'
+import { getProfile, toDraft, toPayload, updateProfile } from '@/features/profile/profileApi'
+import type { ProfileDraft } from '@/features/profile/profileSchema'
+import { ApiError } from '@/lib/api'
 
-const EMPTY_PROFILE: ProfileDraft = {
-  displayName: '',
-  bio: '',
-  avatarUrl: null,
-}
+type State =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ok'; profile: ProfileDraft }
 
 export default function PerfilPage() {
-  // O loader de sessão fica na rota pai /settings, então o dado chega pelo
-  // outlet context. useLoaderData aqui devolveria undefined.
   const { user } = useOutletContext<SessionData>()
-  const [profile, setProfile] = useState<ProfileDraft>(EMPTY_PROFILE)
+  const [state, setState] = useState<State>({ status: 'loading' })
   const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
-  function handleSave(draft: ProfileDraft) {
-    // Ainda não existe PATCH /users/me: o perfil vive só nesta tela e some no
-    // F5. Quando a API entrar, a troca é esta linha por uma chamada.
-    setProfile(draft)
-    setIsEditing(false)
-    setSaved(true)
+  useEffect(() => {
+    let cancelled = false
+
+    getProfile()
+      .then((profile) => {
+        if (!cancelled) setState({ status: 'ok', profile: toDraft(profile) })
+      })
+      .catch(() => {
+        if (!cancelled) setState({ status: 'error' })
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  async function handleSave(draft: ProfileDraft) {
+    setIsSaving(true)
+    setSaveError(null)
+
+    try {
+      const profile = await updateProfile(toPayload(draft))
+      // A resposta ja vem com o perfil salvo, entao o estado local e o que o
+      // servidor gravou: sem GET de confirmacao e sem drift entre os dois.
+      setState({ status: 'ok', profile: toDraft(profile) })
+      setIsEditing(false)
+      setSaved(true)
+    } catch (error) {
+      setSaveError(
+        error instanceof ApiError
+          ? error.message
+          : 'Não foi possível salvar. Tente novamente.',
+      )
+    } finally {
+      setIsSaving(false)
+    }
   }
+
+  const isLoading = state.status === 'loading'
+  const profile = state.status === 'ok' ? state.profile : null
 
   // Sem nome de exibição, a identidade é a parte antes do @ do e-mail — a
   // mesma que o AvatarPicker usa para as iniciais.
-  const identity = profile.displayName.trim() || user.email.split('@')[0]
+  const identity = profile?.displayName.trim() || user.email.split('@')[0]
 
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Perfil</CardTitle>
         <CardDescription>Como os outros usuários te veem.</CardDescription>
-        {!isEditing && (
+        {!isEditing && !isLoading && (
           <CardAction>
             <Button
               variant="outline"
@@ -55,6 +90,7 @@ export default function PerfilPage() {
               className="cursor-pointer"
               onClick={() => {
                 setSaved(false)
+                setSaveError(null)
                 setIsEditing(true)
               }}
             >
@@ -66,42 +102,71 @@ export default function PerfilPage() {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6">
-        {saved && (
-          <Alert>
-            <IconCircleCheckFilled />
-            <AlertTitle>Perfil atualizado</AlertTitle>
+        {isLoading && (
+          <p className="text-sm text-neutral-500" aria-live="polite">
+            Carregando...
+          </p>
+        )}
+
+        {state.status === 'error' && (
+          <Alert variant="destructive">
+            <IconAlertCircleFilled />
+            <AlertTitle>Não foi possível carregar o perfil</AlertTitle>
             <AlertDescription>
-              As alterações valem só nesta sessão — ainda não há salvamento no
-              servidor.
+              Recarregue a página. Se persistir, o servidor pode estar fora do
+              ar.
             </AlertDescription>
           </Alert>
         )}
 
-        {isEditing ? (
-          <ProfileForm
-            profile={profile}
-            email={user.email}
-            onSave={handleSave}
-            onCancel={() => setIsEditing(false)}
-          />
-        ) : (
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-              <Avatar src={profile.avatarUrl} name={identity} />
+        {profile && (
+          <>
+            {saveError && (
+              <Alert variant="destructive">
+                <IconAlertCircleFilled />
+                <AlertTitle>Não foi possível salvar</AlertTitle>
+                <AlertDescription>{saveError}</AlertDescription>
+              </Alert>
+            )}
 
-              <div className="min-w-0">
-                <p className="font-medium">{identity}</p>
-                <p className="truncate text-sm text-neutral-500">{user.email}</p>
+            {saved && !isEditing && (
+              <Alert>
+                <IconCircleCheckFilled />
+                <AlertTitle>Perfil atualizado</AlertTitle>
+                <AlertDescription>
+                  Suas alterações já estão salvas.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {isEditing ? (
+              <ProfileForm
+                profile={profile}
+                email={user.email}
+                isSaving={isSaving}
+                onSave={handleSave}
+                onCancel={() => setIsEditing(false)}
+              />
+            ) : (
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                  <Avatar src={profile.avatarUrl} name={identity} />
+
+                  <div className="min-w-0">
+                    <p className="font-medium">{identity}</p>
+                    <p className="truncate text-sm text-neutral-500">{user.email}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-medium text-neutral-500">Bio</p>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {profile.bio.trim() || 'Você ainda não escreveu uma bio.'}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <p className="text-xs font-medium text-neutral-500">Bio</p>
-              <p className="text-sm whitespace-pre-wrap">
-                {profile.bio.trim() || 'Você ainda não escreveu uma bio.'}
-              </p>
-            </div>
-          </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
