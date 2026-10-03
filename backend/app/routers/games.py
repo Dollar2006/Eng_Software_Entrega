@@ -1,13 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import Uuid, cast, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models.game import Game
+from app.models.profile import Profile
 from app.models.review import Review
-from app.schema.game import FiltersOut, GameDetailOut, GameOut, RatingIn, RatingOut
+from app.schema.game import (
+    FiltersOut,
+    GameDetailOut,
+    GameOut,
+    RatingIn,
+    RatingOut,
+    ReviewIn,
+    ReviewOut,
+)
 
 router = APIRouter(prefix="/games", tags=["games"])
 
@@ -15,6 +24,11 @@ router = APIRouter(prefix="/games", tags=["games"])
 def _distinct_values(db: Session, column) -> list[str]:
     value = func.unnest(column).label("value")
     return list(db.scalars(select(value).distinct().order_by(value)))
+
+
+def _ensure_game_exists(db: Session, game_id: int) -> None:
+    if db.get(Game, game_id) is None:
+        raise HTTPException(status_code=404, detail="Jogo não encontrado")
 
 
 @router.get("/filters", response_model=FiltersOut)
@@ -72,7 +86,9 @@ def get_my_rating(
         .filter(Review.game_id == game_id, Review.user_id == user["id"])
         .first()
     )
-    return {"rating": review.rating if review else None}
+    if review is None:
+        return {"rating": None, "text": None}
+    return {"rating": review.rating, "text": review.text}
 
 
 @router.put("/{game_id}/rating", response_model=RatingOut)
@@ -82,12 +98,12 @@ def rate_game(
     db: Session = Depends(get_db),
     user: dict[str, str] = Depends(get_current_user),
 ):
-    if db.get(Game, game_id) is None:
-        raise HTTPException(status_code=404, detail="Jogo não encontrado")
+    _ensure_game_exists(db, game_id)
 
     stmt = insert(Review).values(
         user_id=user["id"], game_id=game_id, rating=body.rating
     )
+    # Só a nota muda: se o usuário já tinha escrito uma review, o texto fica.
     stmt = stmt.on_conflict_do_update(
         constraint="uq_reviews_user_game",
         set_={"rating": body.rating, "updated_at": func.now()},
@@ -95,3 +111,74 @@ def rate_game(
     db.execute(stmt)
     db.commit()
     return {"rating": body.rating}
+
+
+# ---- REQ-08: review escrita ----
+
+
+@router.get("/{game_id}/reviews", response_model=list[ReviewOut])
+def list_reviews(
+    game_id: int,
+    limit: int = Query(10, ge=1, le=50),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    _ensure_game_exists(db, game_id)
+
+    # Outer join: quem nunca preencheu o perfil continua aparecendo.
+    rows = (
+        db.query(Review, Profile.display_name, Profile.avatar)
+        .outerjoin(Profile, Profile.user_id == cast(Review.user_id, Uuid))
+        .filter(Review.game_id == game_id, Review.text.is_not(None))
+        .order_by(Review.updated_at.desc(), Review.id.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    reviews = []
+    for review, display_name, avatar in rows:
+        item = ReviewOut.model_validate(review)
+        # Nome de exibição do perfil; sem ele, o nome guardado na review.
+        item.author_name = (display_name or "").strip() or review.author_name
+        item.author_avatar = avatar
+        reviews.append(item)
+    return reviews
+
+
+@router.put("/{game_id}/review", response_model=ReviewOut)
+def write_review(
+    game_id: int,
+    body: ReviewIn,
+    db: Session = Depends(get_db),
+    user: dict[str, str] = Depends(get_current_user),
+):
+    _ensure_game_exists(db, game_id)
+
+    # Mesma identidade que a tela de perfil usa: a parte antes do @ do e-mail.
+    author_name = user["email"].split("@")[0]
+
+    stmt = insert(Review).values(
+        user_id=user["id"],
+        game_id=game_id,
+        rating=body.rating,
+        text=body.text,
+        author_name=author_name,
+    )
+    stmt = stmt.on_conflict_do_update(
+        constraint="uq_reviews_user_game",
+        set_={
+            "rating": body.rating,
+            "text": body.text,
+            "author_name": author_name,
+            "updated_at": func.now(),
+        },
+    )
+    db.execute(stmt)
+    db.commit()
+
+    return (
+        db.query(Review)
+        .filter(Review.game_id == game_id, Review.user_id == user["id"])
+        .one()
+    )

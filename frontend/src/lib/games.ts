@@ -60,14 +60,50 @@ export async function getGame(id: string): Promise<GameDetail> {
 // As rotas de nota exigem sessão. Sem login o backend responde 401 e o `api`
 // lança ApiError com status 401 (mesmo caminho do requireSession).
 
-// Nota do usuário logado neste jogo (null = ainda não avaliou).
-export async function getMyRating(id: string | number): Promise<number | null> {
-  const response = await api.get<{ rating: number | null }>(
-    `/games/${id}/rating/me`,
-  );
-  return response.data.rating;
+export interface MyReview {
+  rating: number | null;
+  text: string | null;
+}
+
+// Nota e review (se houver) do usuário logado neste jogo.
+export async function getMyReview(id: string | number): Promise<MyReview> {
+  const response = await api.get<MyReview>(`/games/${id}/rating/me`);
+  return response.data;
 }
 
 export async function rateGame(id: string | number, rating: number): Promise<void> {
   await api.put(`/games/${id}/rating`, { rating });
+}
+
+export interface Review {
+  id: number;
+  author_name: string | null;
+  author_avatar: string | null;
+  rating: number;
+  text: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Reviews da comunidade (rota pública, as mais recentes primeiro).
+export async function listReviews(
+  id: string | number,
+  offset = 0,
+  limit = 10,
+): Promise<Review[]> {
+  const res = await fetch(
+    `${API_URL}/games/${id}/reviews?limit=${limit}&offset=${offset}`,
+  );
+  if (!res.ok) throw new Error("Erro ao buscar reviews");
+  return res.json();
+}
+
+// Publica (ou atualiza) a review do usuário junto com a nota.
+export async function writeReview(
+  id: string | number,
+  rating: number,
+  text: string,
+): Promise<Review> {
+  const response = await api.put<Review>(`/games/${id}/review`, { rating, text });
+  return response.data;
 }
