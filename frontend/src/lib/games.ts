@@ -107,3 +107,24 @@ export async function writeReview(
   const response = await api.put<Review>(`/games/${id}/review`, { rating, text });
   return response.data;
 }
+
+export interface MyReviewItem {
+  game: Game;
+  rating: number;
+  text: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Reviews do usuário logado (as mais recentes primeiro), com o jogo junto.
+export async function listMyReviews(offset = 0, limit = 12): Promise<MyReviewItem[]> {
+  const response = await api.get<MyReviewItem[]>(
+    `/users/me/reviews?limit=${limit}&offset=${offset}`,
+  );
+  return response.data;
+}
+
+// Remove a review e a nota do usuário neste jogo.
+export async function deleteReview(id: string | number): Promise<void> {
+  await api.delete(`/games/${id}/review`);
+}

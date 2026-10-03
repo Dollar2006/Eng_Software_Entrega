@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import Uuid, cast, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models.game import Game
-from app.models.profile import Profile
+from app.models.profile import Profile  # ajuste ao arquivo real do model
 from app.models.review import Review
 from app.schema.game import (
     FiltersOut,
@@ -73,6 +73,9 @@ def get_game(game_id: int, db: Session = Depends(get_db)):
     detail.rating_avg = round(float(avg), 1) if avg is not None else None
     detail.rating_count = count
     return detail
+
+
+# ---- REQ-07: nota de 1 a 5 estrelas ----
 
 
 @router.get("/{game_id}/rating/me", response_model=RatingOut)
@@ -182,3 +185,22 @@ def write_review(
         .filter(Review.game_id == game_id, Review.user_id == user["id"])
         .one()
     )
+
+
+@router.delete("/{game_id}/review", status_code=status.HTTP_204_NO_CONTENT)
+def delete_review(
+    game_id: int,
+    db: Session = Depends(get_db),
+    user: dict[str, str] = Depends(get_current_user),
+):
+    # Só apaga a linha do próprio usuário (nota e texto deste jogo).
+    review = (
+        db.query(Review)
+        .filter(Review.game_id == game_id, Review.user_id == user["id"])
+        .first()
+    )
+    if review is None:
+        raise HTTPException(status_code=404, detail="Review não encontrada")
+
+    db.delete(review)
+    db.commit()

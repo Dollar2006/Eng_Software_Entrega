@@ -63,3 +63,13 @@ class ReviewOut(BaseModel):
     text: str
     created_at: datetime
     updated_at: datetime
+
+
+class MyReviewOut(BaseModel):
+    """Review do usuário logado, com o jogo junto (aba Reviews do perfil)."""
+
+    game: GameOut
+    rating: int
+    text: str
+    created_at: datetime
+    updated_at: datetime

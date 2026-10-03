@@ -1,8 +1,15 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { Game } from '@/lib/games'
 import { label } from '@/lib/labels'
 
-export default function GameCard({ game }: { game: Game }) {
+type GameCardProps = {
+  game: Game
+  // Conteúdo extra no rodapé do card (ex.: nota, texto e botões da review).
+  children?: ReactNode
+}
+
+export default function GameCard({ game, children }: GameCardProps) {
   return (
     <article className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white transition-colors hover:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900">
       <div className="grid h-32 place-items-center bg-neutral-100">
@@ -48,6 +55,13 @@ export default function GameCard({ game }: { game: Game }) {
           {game.platforms.map(label).join(', ')}
         </p>
       </div>
+
+      {/* z-10: fica acima do link esticado do título, então os botões clicam */}
+      {children && (
+        <div className="relative z-10 border-t border-neutral-200 p-4">
+          {children}
+        </div>
+      )}
     </article>
   )
 }

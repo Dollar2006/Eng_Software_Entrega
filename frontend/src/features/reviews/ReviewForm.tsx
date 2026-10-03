@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
 import {
@@ -25,7 +25,9 @@ type ReviewFormProps = {
   // Nota atual do usuário: a review é publicada junto com ela.
   rating: number | null
   initialText: string
-  onSaved: () => void
+  onSaved: (text: string) => void
+  // Se informado, mostra o botão Cancelar (usado na edição pelo perfil).
+  onCancel?: () => void
 }
 
 export default function ReviewForm({
@@ -33,7 +35,11 @@ export default function ReviewForm({
   rating,
   initialText,
   onSaved,
+  onCancel,
 }: ReviewFormProps) {
+  const uid = useId()
+  const textId = `review-text-${uid}`
+  const errorId = `${textId}-error`
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [published, setPublished] = useState(initialText.length > 0)
@@ -61,7 +67,7 @@ export default function ReviewForm({
       await writeReview(gameId, rating, values.text)
       setPublished(true)
       setSaved(true)
-      onSaved()
+      onSaved(values.text)
     } catch (error) {
       if (!(error instanceof ApiError)) {
         setSubmitError('Erro inesperado. Tente novamente.')
@@ -102,18 +108,18 @@ export default function ReviewForm({
       )}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="review-text">Sua review</Label>
+        <Label htmlFor={textId}>Sua review</Label>
         <Textarea
-          id="review-text"
+          id={textId}
           rows={5}
           placeholder="Conte como foi sua experiência com o jogo."
           className="field-sizing-fixed h-32 resize-y"
           aria-invalid={errors.text ? true : undefined}
-          aria-describedby={errors.text ? 'review-text-error' : undefined}
+          aria-describedby={errors.text ? errorId : undefined}
           {...register('text')}
         />
         <div className="flex items-start justify-between gap-2">
-          <FieldError id="review-text-error" message={errors.text?.message} />
+          <FieldError id={errorId} message={errors.text?.message} />
           <span
             className={cn(
               'ml-auto text-xs tabular-nums text-neutral-500',
@@ -131,7 +137,7 @@ export default function ReviewForm({
         </p>
       )}
 
-      <div>
+      <div className="flex gap-2">
         <Button
           type="submit"
           disabled={isSubmitting || !rating}
@@ -143,6 +149,16 @@ export default function ReviewForm({
               ? 'Atualizar review'
               : 'Publicar review'}
         </Button>
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={onCancel}
+          >
+            Cancelar
+          </Button>
+        )}
       </div>
     </form>
   )

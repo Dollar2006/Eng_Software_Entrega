@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { IconStar, IconStarFilled } from '@tabler/icons-react'
 
+import StarsDisplay from '@/components/game/StarsDisplay'
 import Avatar from '@/components/profile/Avatar'
 import { Button } from '@/components/ui/button'
 import { listReviews, type Review } from '@/lib/games'
@@ -11,20 +11,6 @@ type ReviewListProps = {
   gameId: string | number
   // Muda quando o usuário salva uma review, para a lista recarregar.
   refreshKey?: number
-}
-
-function Stars({ value }: { value: number }) {
-  return (
-    <span role="img" aria-label={`Nota ${value} de 5`} className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) =>
-        n <= value ? (
-          <IconStarFilled key={n} className="size-4 text-neutral-900" />
-        ) : (
-          <IconStar key={n} className="size-4 text-neutral-400" />
-        ),
-      )}
-    </span>
-  )
 }
 
 export default function ReviewList({ gameId, refreshKey = 0 }: ReviewListProps) {
@@ -107,7 +93,7 @@ export default function ReviewList({ gameId, refreshKey = 0 }: ReviewListProps) 
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span className="text-sm font-medium">{authorName}</span>
-                    <Stars value={review.rating} />
+                    <StarsDisplay value={review.rating} />
                   </div>
                   <time
                     dateTime={review.updated_at}
