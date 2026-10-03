@@ -11,19 +11,15 @@ import FieldError from '@/features/auth/FieldError'
 import {
     BIO_MAX_LENGTH,
     profileSchema,
+    type ProfileDraft,
     type ProfileFormValues,
 } from '@/features/profile/profileSchema'
 import { cn } from '@/lib/utils'
 
-export type ProfileDraft = {
-    displayName: string
-    bio: string
-    avatarUrl: string | null
-}
-
 type ProfileFormProps = {
     profile: ProfileDraft
     email: string
+    isSaving?: boolean
     onSave: (draft: ProfileDraft) => void
     onCancel: () => void
 }
@@ -31,6 +27,7 @@ type ProfileFormProps = {
 export default function ProfileForm({
     profile,
     email,
+    isSaving = false,
     onSave,
     onCancel,
 }: ProfileFormProps) {
@@ -103,8 +100,8 @@ export default function ProfileForm({
             </div>
 
             <div className="flex gap-2">
-                <Button type="submit" className="cursor-pointer">
-                    Salvar
+                <Button type="submit" className="cursor-pointer" disabled={isSaving}>
+                    {isSaving ? 'Salvando...' : 'Salvar'}
                 </Button>
                 <Button
                     type="button"

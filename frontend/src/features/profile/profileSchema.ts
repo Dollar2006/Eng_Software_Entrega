@@ -17,3 +17,11 @@ export const profileSchema = z.object({
 })
 
 export type ProfileFormValues = z.infer<typeof profileSchema>
+
+// O avatar fica fora do react-hook-form por nao ser campo de texto, entao o
+// rascunho da tela e o valor do schema acrescido do avatar. Vive aqui e nao no
+// ProfileForm para que a camada de API possa usar o tipo sem importar um
+// componente.
+export type ProfileDraft = ProfileFormValues & {
+    avatarUrl: string | null
+}

@@ -9,6 +9,73 @@ const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
+// O Avatar e um circulo de 96 px com object-cover, entao 512 tem folga de sobra
+// para tela de retina sem inflar a coluna Text do banco.
+const AVATAR_SIZE = 512
+
+// Detectado uma vez: onde nao ha suporte a WebP (Safari antigo) o caminho cai
+// para JPEG, que nao tem canal alpha e precisa de fundo branco atras.
+const SUPPORTS_WEBP = (() => {
+  const probe = document.createElement('canvas')
+  probe.width = 1
+  probe.height = 1
+  return probe.toDataURL('image/webp').startsWith('data:image/webp')
+})()
+
+async function decodeImage(file: File): Promise<{
+  source: ImageBitmap | HTMLImageElement
+  release: () => void
+}> {
+  // createImageBitmap decodifica fora da main thread e e o caminho dos
+  // navegadores atuais. O <img> cobre os mais antigos; o object URL so vive
+  // dentro desta promessa e e revogado logo apos o load.
+  if (typeof createImageBitmap === 'function') {
+    const bitmap = await createImageBitmap(file)
+    return { source: bitmap, release: () => bitmap.close() }
+  }
+
+  const url = URL.createObjectURL(file)
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error('falha ao decodificar'))
+    img.src = url
+  })
+  return { source: image, release: () => URL.revokeObjectURL(url) }
+}
+
+async function resizeToSquare(file: File): Promise<string> {
+  const { source, release } = await decodeImage(file)
+
+  try {
+    // Crop no lado menor, centralizado. Esticar para quadrado deformaria a
+    // imagem; o Avatar ja faz o object-cover, entao o corte acontece aqui.
+    const side = Math.min(source.width, source.height)
+    const sx = (source.width - side) / 2
+    const sy = (source.height - side) / 2
+
+    const canvas = document.createElement('canvas')
+    canvas.width = AVATAR_SIZE
+    canvas.height = AVATAR_SIZE
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('canvas indisponivel')
+
+    if (!SUPPORTS_WEBP) {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, AVATAR_SIZE, AVATAR_SIZE)
+    }
+
+    ctx.drawImage(source, sx, sy, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE)
+
+    return SUPPORTS_WEBP
+      ? canvas.toDataURL('image/webp', 0.85)
+      : canvas.toDataURL('image/jpeg', 0.85)
+  } finally {
+    release()
+  }
+}
+
 type AvatarPickerProps = {
   value: string | null
   name: string
@@ -20,7 +87,7 @@ export default function AvatarPicker({ value, name, onChange }: AvatarPickerProp
   const [preview, setPreview] = useState<string | null>(value)
   const [error, setError] = useState<string | null>(null)
 
-  function pickFile(file: File | undefined) {
+  async function pickFile(file: File | undefined) {
     if (!file) return
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -32,22 +99,21 @@ export default function AvatarPicker({ value, name, onChange }: AvatarPickerProp
       return
     }
 
-    // Data URL em vez de createObjectURL: um object URL morre junto com esta
-    // tela, e o perfil salvo ainda precisa da foto depois que o form sai de
-    // cena. O custo é memória, e não pesa enquanto o perfil viver só em memória.
-    const reader = new FileReader()
+    // As guardas acima sao sincronas de proposito: arquivo invalido nao chega
+    // a ser decodificado.
+    setError(null)
 
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') {
-        setError('Não foi possível ler a imagem. Tente outra.')
-        return
-      }
-      setPreview(reader.result)
-      setError(null)
-      onChange(reader.result)
+    // O avatar viaja como data URL na coluna Text, entao o que importa aqui
+    // nao e so a imagem bonita e sim o tamanho da string. Um JPEG de 2 MB
+    // viraria ~2,7 MB de base64 e ainda seria reenviado a cada edicao da bio;
+    // em 512x512 a string fica na casa das dezenas de KB.
+    try {
+      const dataUrl = await resizeToSquare(file)
+      setPreview(dataUrl)
+      onChange(dataUrl)
+    } catch {
+      setError('Não foi possível processar a imagem. Tente outra.')
     }
-    reader.onerror = () => setError('Não foi possível ler a imagem. Tente outra.')
-    reader.readAsDataURL(file)
   }
 
   function clearPhoto() {
@@ -67,7 +133,9 @@ export default function AvatarPicker({ value, name, onChange }: AvatarPickerProp
           ref={inputRef}
           type="file"
           accept={ACCEPTED_TYPES.join(',')}
-          onChange={(event) => pickFile(event.target.files?.[0])}
+          onChange={(event) => {
+            void pickFile(event.target.files?.[0])
+          }}
           tabIndex={-1}
           className="sr-only"
         />
