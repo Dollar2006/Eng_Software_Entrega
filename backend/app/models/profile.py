@@ -1,6 +1,7 @@
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.database import Base
+from app.models.auth_user import auth_users  # noqa: F401
 
 class Profile(Base):
     __tablename__ = "profiles"
