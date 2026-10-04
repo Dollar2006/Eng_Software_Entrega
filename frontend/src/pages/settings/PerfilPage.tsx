@@ -4,6 +4,7 @@ import { IconAlertCircleFilled, IconCircleCheckFilled, IconPencil } from '@table
 
 import Avatar from '@/components/profile/Avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import ProfileTabs from '@/features/profile/ProfileTabs'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -169,6 +170,7 @@ export default function PerfilPage() {
           </>
         )}
       </CardContent>
+      <ProfileTabs />
     </Card>
   )
 }
