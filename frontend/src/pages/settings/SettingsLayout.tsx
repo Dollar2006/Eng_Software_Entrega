@@ -17,13 +17,7 @@ type SettingsNavItem = {
 
 const settingsNav: SettingsNavItem[] = [
   { label: 'Perfil', to: 'perfil', icon: IconUserCircle },
-  {
-    label: 'Conta',
-    to: 'conta',
-    icon: IconSettings,
-    disabled: true,
-    badge: 'Em breve',
-  },
+  { label: 'Conta', to: 'conta', icon: IconSettings },
 ]
 
 export default function SettingsLayout() {
