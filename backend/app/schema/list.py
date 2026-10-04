@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class StatusIn(BaseModel):
@@ -32,5 +32,17 @@ class ListItemOut(BaseModel):
     added_at: datetime
 
 
-class SystemListsOut(BaseModel):
+class CreateListIn(BaseModel):
+    name: str = Field(min_length=1, max_length=50)
+
+
+class UpdateListIn(BaseModel):
+    name: str = Field(min_length=1, max_length=50)
+
+
+class AddListItemIn(BaseModel):
+    game_id: int
+
+
+class ListsOut(BaseModel):
     lists: list[ListRefOut]
