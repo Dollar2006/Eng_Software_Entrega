@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { GameNotFoundError, getGame, type GameDetail } from '@/lib/games'
 import { label } from '@/lib/labels'
+import GameStatus from '@/components/game/GameStatus'
 
 type State =
   | { status: 'loading' }
@@ -120,6 +121,11 @@ export function GameDetailsPage() {
                     </li>
                   ))}
                 </ul>
+              </section>
+
+              <section>
+                <h2 className={sectionTitleClass}>Status na minha biblioteca</h2>
+                <GameStatus gameId={id} />
               </section>
 
               <section>
