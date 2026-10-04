@@ -4,6 +4,7 @@ import { GameNotFoundError, getGame, type GameDetail } from '@/lib/games'
 import RateGame from '@/components/game/RateGame'
 import ReviewList from '@/components/game/ReviewList'
 import { label } from '@/lib/labels'
+import GameStatus from '@/components/game/GameStatus'
 
 type State =
   | { status: 'loading' }
@@ -137,6 +138,11 @@ export function GameDetailsPage() {
                     </li>
                   ))}
                 </ul>
+              </section>
+
+              <section>
+                <h2 className={sectionTitleClass}>Status na minha biblioteca</h2>
+                <GameStatus gameId={id} />
               </section>
 
               <section>
