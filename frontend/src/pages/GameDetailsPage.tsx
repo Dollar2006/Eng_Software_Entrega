@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { GameNotFoundError, getGame, type GameDetail } from '@/lib/games'
 import RateGame from '@/components/game/RateGame'
 import ReviewList from '@/components/game/ReviewList'
+import CustomListPicker from '@/components/game/CustomListPicker'
 import { label } from '@/lib/labels'
 import GameStatus from '@/components/game/GameStatus'
 
@@ -97,8 +98,8 @@ export function GameDetailsPage() {
 
         {state.status === 'ok' && (
           <>
-          <article className="mt-6 overflow-hidden rounded-xl border border-neutral-200 bg-white md:grid md:grid-cols-[320px_1fr]">
-            <div className="grid h-64 place-items-center bg-neutral-100 md:h-full">
+          <article className="mt-6 rounded-xl border border-neutral-200 bg-white md:grid md:grid-cols-[320px_1fr]">
+            <div className="grid h-64 place-items-center overflow-hidden rounded-t-xl bg-neutral-100 md:h-full md:rounded-l-xl md:rounded-tr-none">
               {state.game.cover_url ? (
                 <img
                   src={state.game.cover_url}
@@ -141,32 +142,38 @@ export function GameDetailsPage() {
               </section>
 
               <section>
-                <h2 className={sectionTitleClass}>Status na minha biblioteca</h2>
-                <GameStatus gameId={id} />
-              </section>
-
-              <section>
-                <h2 className={sectionTitleClass}>Avaliação</h2>
-                <p className="mb-3 text-sm text-neutral-700">
-                  {state.game.rating_avg !== null
-                    ? `${state.game.rating_avg.toFixed(1)} de 5 · ${state.game.rating_count} ${state.game.rating_count === 1 ? 'avaliação' : 'avaliações'}`
-                    : 'Ainda sem avaliações.'}
-                </p>
-                <RateGame
-                  gameId={id}
-                  onRated={refreshGame}
-                  onReviewed={handleReviewed}
-                />
-              </section>
-
-              <section>
                 <h2 className={sectionTitleClass}>Sobre</h2>
                 <p className="text-sm leading-relaxed text-neutral-700">
                   {state.game.description ?? 'Este jogo ainda não tem descrição.'}
                 </p>
               </section>
+
+              <section>
+                <h2 className={sectionTitleClass}>Status na minha biblioteca</h2>
+                <GameStatus gameId={id} />
+              </section>
+
+              <section>
+                <h2 className={sectionTitleClass}>Listas personalizadas</h2>
+                <CustomListPicker gameId={id} />
+              </section>
+
             </div>
           </article>
+
+          <section className="mt-8 rounded-xl border border-neutral-200 bg-white p-6">
+            <h2 className={sectionTitleClass}>Avaliação</h2>
+            <p className="mb-3 text-sm text-neutral-700">
+              {state.game.rating_avg !== null
+                ? `${state.game.rating_avg.toFixed(1)} de 5 · ${state.game.rating_count} ${state.game.rating_count === 1 ? 'avaliação' : 'avaliações'}`
+                : 'Ainda sem avaliações.'}
+            </p>
+            <RateGame
+              gameId={id}
+              onRated={refreshGame}
+              onReviewed={handleReviewed}
+            />
+          </section>
 
           <section className="mt-8">
             <h2 className="mb-4 text-lg font-semibold">

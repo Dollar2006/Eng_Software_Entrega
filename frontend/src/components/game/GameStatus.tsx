@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { IconX } from "@tabler/icons-react";
 import { ApiError } from "@/lib/api";
 import {
   getGameStatus,
@@ -96,7 +97,7 @@ export default function GameStatus({ gameId, onChanged }: Props) {
       <p className="text-sm text-neutral-700">
         <button
           type="button"
-          className="underline underline-offset-4 hover:text-neutral-900"
+          className="cursor-pointer underline underline-offset-4 hover:text-neutral-900"
           onClick={() =>
             navigate(`/login?redirect=${encodeURIComponent(`/jogos/${gameId}`)}`)
           }
@@ -122,7 +123,7 @@ export default function GameStatus({ gameId, onChanged }: Props) {
               variant={active ? "default" : "outline"}
               disabled={saving}
               onClick={() => handleSet(k)}
-              className={cn(active && "shadow-sm")}
+              className={cn("cursor-pointer", active && "shadow-sm")}
             >
               {label}
             </Button>
@@ -131,12 +132,15 @@ export default function GameStatus({ gameId, onChanged }: Props) {
         {status !== null && (
           <Button
             type="button"
-            size="sm"
+            size="icon-sm"
             variant="ghost"
             disabled={saving}
             onClick={handleRemove}
+            aria-label="Remover status do jogo"
+            title="Remover status"
+            className="cursor-pointer"
           >
-            Remover
+            <IconX aria-hidden="true" />
           </Button>
         )}
       </div>

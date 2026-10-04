@@ -79,98 +79,100 @@ export default function PerfilPage() {
   const identity = profile?.displayName.trim() || user.email.split('@')[0]
 
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>Perfil</CardTitle>
-        <CardDescription>Como os outros usuários te veem.</CardDescription>
-        {!isEditing && !isLoading && (
-          <CardAction>
-            <Button
-              variant="outline"
-              size="sm"
-              className="cursor-pointer"
-              onClick={() => {
-                setSaved(false)
-                setSaveError(null)
-                setIsEditing(true)
-              }}
-            >
-              <IconPencil className="size-4" />
-              Editar
-            </Button>
-          </CardAction>
-        )}
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>Perfil</CardTitle>
+          <CardDescription>Como os outros usuários te veem.</CardDescription>
+          {!isEditing && !isLoading && (
+            <CardAction>
+              <Button
+                variant="outline"
+                size="sm"
+                className="cursor-pointer"
+                onClick={() => {
+                  setSaved(false)
+                  setSaveError(null)
+                  setIsEditing(true)
+                }}
+              >
+                <IconPencil className="size-4" />
+                Editar
+              </Button>
+            </CardAction>
+          )}
+        </CardHeader>
 
-      <CardContent className="flex flex-col gap-6">
-        {isLoading && (
-          <p className="text-sm text-neutral-500" aria-live="polite">
-            Carregando...
-          </p>
-        )}
+        <CardContent className="flex flex-col gap-6">
+          {isLoading && (
+            <p className="text-sm text-neutral-500" aria-live="polite">
+              Carregando...
+            </p>
+          )}
 
-        {state.status === 'error' && (
-          <Alert variant="destructive">
-            <IconAlertCircleFilled />
-            <AlertTitle>Não foi possível carregar o perfil</AlertTitle>
-            <AlertDescription>
-              Recarregue a página. Se persistir, o servidor pode estar fora do
-              ar.
-            </AlertDescription>
-          </Alert>
-        )}
+          {state.status === 'error' && (
+            <Alert variant="destructive">
+              <IconAlertCircleFilled />
+              <AlertTitle>Não foi possível carregar o perfil</AlertTitle>
+              <AlertDescription>
+                Recarregue a página. Se persistir, o servidor pode estar fora do
+                ar.
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {profile && (
-          <>
-            {saveError && (
-              <Alert variant="destructive">
-                <IconAlertCircleFilled />
-                <AlertTitle>Não foi possível salvar</AlertTitle>
-                <AlertDescription>{saveError}</AlertDescription>
-              </Alert>
-            )}
+          {profile && (
+            <>
+              {saveError && (
+                <Alert variant="destructive">
+                  <IconAlertCircleFilled />
+                  <AlertTitle>Não foi possível salvar</AlertTitle>
+                  <AlertDescription>{saveError}</AlertDescription>
+                </Alert>
+              )}
 
-            {saved && !isEditing && (
-              <Alert>
-                <IconCircleCheckFilled />
-                <AlertTitle>Perfil atualizado</AlertTitle>
-                <AlertDescription>
-                  Suas alterações já estão salvas.
-                </AlertDescription>
-              </Alert>
-            )}
+              {saved && !isEditing && (
+                <Alert>
+                  <IconCircleCheckFilled />
+                  <AlertTitle>Perfil atualizado</AlertTitle>
+                  <AlertDescription>
+                    Suas alterações já estão salvas.
+                  </AlertDescription>
+                </Alert>
+              )}
 
-            {isEditing ? (
-              <ProfileForm
-                profile={profile}
-                email={user.email}
-                isSaving={isSaving}
-                onSave={handleSave}
-                onCancel={() => setIsEditing(false)}
-              />
-            ) : (
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                  <Avatar src={profile.avatarUrl} name={identity} />
+              {isEditing ? (
+                <ProfileForm
+                  profile={profile}
+                  email={user.email}
+                  isSaving={isSaving}
+                  onSave={handleSave}
+                  onCancel={() => setIsEditing(false)}
+                />
+              ) : (
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                    <Avatar src={profile.avatarUrl} name={identity} />
 
-                  <div className="min-w-0">
-                    <p className="font-medium">{identity}</p>
-                    <p className="truncate text-sm text-neutral-500">{user.email}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium">{identity}</p>
+                      <p className="truncate text-sm text-neutral-500">{user.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs font-medium text-neutral-500">Bio</p>
+                    <p className="text-sm whitespace-pre-wrap">
+                      {profile.bio.trim() || 'Você ainda não escreveu uma bio.'}
+                    </p>
                   </div>
                 </div>
-
-                <div className="flex flex-col gap-1">
-                  <p className="text-xs font-medium text-neutral-500">Bio</p>
-                  <p className="text-sm whitespace-pre-wrap">
-                    {profile.bio.trim() || 'Você ainda não escreveu uma bio.'}
-                  </p>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </CardContent>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
       <ProfileTabs />
-    </Card>
+    </>
   )
 }
