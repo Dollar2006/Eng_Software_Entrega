@@ -98,8 +98,8 @@ export function GameDetailsPage() {
 
         {state.status === 'ok' && (
           <>
-          <article className="mt-6 overflow-hidden rounded-xl border border-neutral-200 bg-white md:grid md:grid-cols-[320px_1fr]">
-            <div className="grid h-64 place-items-center bg-neutral-100 md:h-full">
+          <article className="mt-6 rounded-xl border border-neutral-200 bg-white md:grid md:grid-cols-[320px_1fr]">
+            <div className="grid h-64 place-items-center overflow-hidden rounded-t-xl bg-neutral-100 md:h-full md:rounded-l-xl md:rounded-tr-none">
               {state.game.cover_url ? (
                 <img
                   src={state.game.cover_url}
