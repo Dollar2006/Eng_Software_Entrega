@@ -1,6 +1,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react'
 
 import MyReviews from '@/features/profile/MyReviews'
+import CustomLists from '@/features/profile/CustomLists'
 import { cn } from '@/lib/utils'
 
 const TABS = [
@@ -66,26 +67,24 @@ export default function ProfileTabs() {
 
       <div
         role="tabpanel"
-        id={`${baseId}-panel-${active}`}
-        aria-labelledby={`${baseId}-tab-${active}`}
+        id={`${baseId}-panel-reviews`}
+        aria-labelledby={`${baseId}-tab-reviews`}
+        hidden={active !== 'reviews'}
         className="space-y-4"
       >
-        {active === 'reviews' && (
-          <>
-            <h2 className="text-base font-medium">Minhas Reviews de Jogos</h2>
-            <MyReviews />
-          </>
-        )}
+        <h2 className="text-base font-medium">Minhas Reviews de Jogos</h2>
+        <MyReviews />
+      </div>
 
-        {active === 'listas' && (
-          <>
-            <h2 className="text-base font-medium">Minhas Listas</h2>
-            <p className="text-sm text-neutral-500">
-              As listas personalizadas de jogos ainda não estão disponíveis. Em
-              breve você poderá criar e organizar as suas por aqui.
-            </p>
-          </>
-        )}
+      <div
+        role="tabpanel"
+        id={`${baseId}-panel-listas`}
+        aria-labelledby={`${baseId}-tab-listas`}
+        hidden={active !== 'listas'}
+        className="space-y-4"
+      >
+        <h2 className="text-base font-medium">Minhas Listas</h2>
+        <CustomLists />
       </div>
     </section>
   )
