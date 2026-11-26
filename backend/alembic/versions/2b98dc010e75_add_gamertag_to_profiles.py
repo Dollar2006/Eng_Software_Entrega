@@ -1,7 +1,7 @@
 """add gamertag to profiles
 
 Revision ID: 2b98dc010e75
-Revises: aa6214463f7e
+Revises: 4de593edd391
 Create Date: 2026-11-26 09:50:16.756266
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '2b98dc010e75'
-down_revision: Union[str, Sequence[str], None] = 'aa6214463f7e'
+down_revision: Union[str, Sequence[str], None] = '4de593edd391'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
