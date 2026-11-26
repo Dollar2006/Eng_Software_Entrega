@@ -59,6 +59,7 @@ class ReviewOut(BaseModel):
     author_name: str | None = None
     # Foto do perfil do autor (a mesma do /users/me/profile); null = sem foto.
     author_avatar: str | None = None
+    author_gamertag: str | None = None
     rating: int
     text: str
     created_at: datetime

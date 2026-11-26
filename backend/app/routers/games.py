@@ -130,7 +130,7 @@ def list_reviews(
 
     # Outer join: quem nunca preencheu o perfil continua aparecendo.
     rows = (
-        db.query(Review, Profile.display_name, Profile.avatar)
+        db.query(Review, Profile.display_name, Profile.avatar, Profile.gamertag)
         .outerjoin(Profile, Profile.user_id == cast(Review.user_id, Uuid))
         .filter(Review.game_id == game_id, Review.text.is_not(None))
         .order_by(Review.updated_at.desc(), Review.id.desc())
@@ -140,11 +140,12 @@ def list_reviews(
     )
 
     reviews = []
-    for review, display_name, avatar in rows:
+    for review, display_name, avatar, gamertag in rows:
         item = ReviewOut.model_validate(review)
         # Nome de exibição do perfil; sem ele, o nome guardado na review.
         item.author_name = (display_name or "").strip() or review.author_name
         item.author_avatar = avatar
+        item.author_gamertag = gamertag
         reviews.append(item)
     return reviews
 

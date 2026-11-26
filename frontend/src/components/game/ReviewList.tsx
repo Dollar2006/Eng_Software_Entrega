@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 
 import StarsDisplay from '@/components/game/StarsDisplay'
 import Avatar from '@/components/profile/Avatar'
@@ -92,7 +93,16 @@ export default function ReviewList({ gameId, refreshKey = 0 }: ReviewListProps) 
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="text-sm font-medium">{authorName}</span>
+                    {review.author_gamertag ? (
+                      <Link
+                        to={`/u/${encodeURIComponent(review.author_gamertag)}`}
+                        className="text-sm font-medium hover:underline"
+                      >
+                        {authorName}
+                      </Link>
+                    ) : (
+                      <span className="text-sm font-medium">{authorName}</span>
+                    )}
                     <StarsDisplay value={review.rating} />
                   </div>
                   <time

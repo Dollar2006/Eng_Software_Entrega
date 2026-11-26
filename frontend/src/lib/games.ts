@@ -79,6 +79,7 @@ export interface Review {
   id: number;
   author_name: string | null;
   author_avatar: string | null;
+  author_gamertag: string | null;
   rating: number;
   text: string;
   created_at: string;
