@@ -42,7 +42,11 @@ export default function ProfileForm({
         formState: { errors },
     } = useForm<ProfileFormValues>({
         resolver: zodResolver(profileSchema),
-        defaultValues: { displayName: profile.displayName, bio: profile.bio },
+        defaultValues: {
+            gamertag: profile.gamertag,
+            displayName: profile.displayName,
+            bio: profile.bio,
+        },
     })
 
     // useWatch em vez de watch(): o React Compiler não consegue memoizar a
@@ -62,6 +66,21 @@ export default function ProfileForm({
                 name={displayName || email.split('@')[0]}
                 onChange={setAvatarUrl}
             />
+
+            <div className="flex flex-col gap-2">
+                <Label htmlFor="gamertag">Gamertag</Label>
+                <Input
+                    id="gamertag"
+                    placeholder="seu_nome"
+                    aria-invalid={errors.gamertag ? true : undefined}
+                    aria-describedby={errors.gamertag ? 'gamertag-error gamertag-help' : 'gamertag-help'}
+                    {...register('gamertag')}
+                />
+                <p id="gamertag-help" className="text-xs text-neutral-500">
+                    3-30 caracteres: letras, números, _ ou .
+                </p>
+                <FieldError id="gamertag-error" message={errors.gamertag?.message} />
+            </div>
 
             <div className="flex flex-col gap-2">
                 <Label htmlFor="displayName">Nome de exibição</Label>
