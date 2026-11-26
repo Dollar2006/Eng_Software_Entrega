@@ -1,7 +1,13 @@
-from fastapi import APIRouter, Cookie, HTTPException, Response, status
+from uuid import UUID
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.schema.auth import AuthCredentials, AuthResponse, UserResponse
+from app.db.database import get_db
+from app.models.profile import Profile
+from app.schema.auth import AuthCredentials, AuthResponse, RegisterCredentials, UserResponse
 from app.services.supabase_auth import AuthProviderError, SupabaseAuthService
 
 
@@ -26,16 +32,51 @@ def _set_session_cookies(response: Response, access_token: str, refresh_token: s
     )
 
 
+def _ensure_gamertag_available(db: Session, gamertag: str | None) -> None:
+    if gamertag is None:
+        return
+    taken = (
+        db.query(Profile.user_id)
+        .filter(func.lower(Profile.gamertag) == gamertag.lower())
+        .first()
+    )
+    if taken is not None:
+        raise HTTPException(status_code=409, detail="Essa gamertag já está em uso.")
+
+
+def _set_profile_gamertag(db: Session, user_id: str, gamertag: str | None) -> None:
+    if gamertag is None:
+        return
+    uid = UUID(user_id)
+    taken = (
+        db.query(Profile.user_id)
+        .filter(func.lower(Profile.gamertag) == gamertag.lower(), Profile.user_id != uid)
+        .first()
+    )
+    if taken is not None:
+        raise HTTPException(status_code=409, detail="Essa gamertag já está em uso.")
+    profile = db.get(Profile, uid)
+    if profile is None:
+        profile = Profile(user_id=uid, gamertag=gamertag)
+        db.add(profile)
+    else:
+        profile.gamertag = gamertag
+    db.commit()
+
+
 @router.post(
     "/register",
     response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def register(credentials: AuthCredentials, response: Response):
+def register(credentials: RegisterCredentials, response: Response, db: Session = Depends(get_db)):
+    _ensure_gamertag_available(db, credentials.gamertag)
     try:
         registration = auth_service.register(credentials.email, credentials.password)
     except AuthProviderError as error:
         _raise_provider_error(error)
+
+    _set_profile_gamertag(db, registration.user["id"], credentials.gamertag)
 
     if registration.session is not None:
         session = registration.session
