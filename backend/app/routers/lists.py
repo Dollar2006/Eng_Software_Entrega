@@ -1,24 +1,29 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models.game import Game
 from app.models.list import List, ListItem
+from app.models.profile import Profile
+from app.schema.game import GameOut
 from app.schema.list import (
-    GameStatusOut,
     AddListItemIn,
     CreateListIn,
+    GameStatusOut,
     ListItemOut,
     ListRefOut,
     ListsOut,
+    PublicListItemOut,
     SetStatusIn,
     UpdateListIn,
 )
 
 router = APIRouter(prefix="/users/me/lists", tags=["lists"])
+public_router = APIRouter(prefix="/users", tags=["lists"])
 
 SYSTEM_LISTS = {
     "played": "Jogados",
@@ -32,6 +37,17 @@ def _current_user_id(user: dict[str, str]) -> UUID:
         return UUID(user["id"])
     except (KeyError, TypeError, ValueError) as error:
         raise HTTPException(status_code=401, detail="Sessão inválida") from error
+
+
+def _profile_by_gamertag(db: Session, gamertag: str) -> Profile:
+    profile = (
+        db.query(Profile)
+        .filter(func.lower(Profile.gamertag) == gamertag.lower())
+        .first()
+    )
+    if profile is None or not profile.gamertag:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return profile
 
 
 def _ensure_system_lists(db: Session, user_id: UUID) -> list[List]:
@@ -277,3 +293,35 @@ def remove_list_item(
         raise HTTPException(status_code=404, detail="Jogo não está na lista")
     db.delete(item)
     db.commit()
+
+
+@public_router.get("/{gamertag}/lists", response_model=ListsOut)
+def get_user_lists(gamertag: str, db: Session = Depends(get_db)):
+    profile = _profile_by_gamertag(db, gamertag)
+    lists = db.query(List).filter(List.user_id == profile.user_id).order_by(List.id).all()
+    return {"lists": [ListRefOut.model_validate(l) for l in lists]}
+
+
+@public_router.get(
+    "/{gamertag}/lists/{list_id}/items", response_model=list[PublicListItemOut]
+)
+def get_user_list_items(
+    gamertag: str,
+    list_id: int,
+    db: Session = Depends(get_db),
+):
+    profile = _profile_by_gamertag(db, gamertag)
+    lst = db.get(List, list_id)
+    if lst is None or lst.user_id != profile.user_id:
+        raise HTTPException(status_code=404, detail="Lista não encontrada")
+    rows = (
+        db.query(ListItem, Game)
+        .join(Game, Game.id == ListItem.game_id)
+        .filter(ListItem.list_id == list_id)
+        .order_by(ListItem.added_at.desc())
+        .all()
+    )
+    return [
+        PublicListItemOut(game=GameOut.model_validate(game), added_at=item.added_at)
+        for item, game in rows
+    ]

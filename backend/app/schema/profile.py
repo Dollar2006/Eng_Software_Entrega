@@ -1,4 +1,5 @@
 import re
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -52,6 +53,7 @@ class ProfileOut(BaseModel):
 class PublicProfileOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    user_id: UUID
     gamertag: str
     display_name: str | None = None
     bio: str | None = None
