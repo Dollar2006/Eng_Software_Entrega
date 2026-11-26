@@ -4,10 +4,11 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_current_user_optional
 from app.models.game import Game
 from app.models.profile import Profile  # ajuste ao arquivo real do model
 from app.models.review import Review
+from app.models.review_like import ReviewLike
 from app.schema.game import (
     FiltersOut,
     GameDetailOut,
@@ -125,12 +126,27 @@ def list_reviews(
     limit: int = Query(10, ge=1, le=50),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
+    user: dict[str, str] | None = Depends(get_current_user_optional),
 ):
     _ensure_game_exists(db, game_id)
 
-    # Outer join: quem nunca preencheu o perfil continua aparecendo.
+    likes_count = (
+        select(func.count(ReviewLike.user_id))
+        .where(ReviewLike.review_id == Review.id)
+        .correlate(Review)
+        .scalar_subquery()
+        .label("likes_count")
+    )
+    liked_by_me = (
+        select(func.count(ReviewLike.user_id) > 0)
+        .where(ReviewLike.review_id == Review.id, ReviewLike.user_id == (user["id"] if user else None))
+        .correlate(Review)
+        .scalar_subquery()
+        .label("liked_by_me")
+    )
+
     rows = (
-        db.query(Review, Profile.display_name, Profile.avatar, Profile.gamertag)
+        db.query(Review, Profile.display_name, Profile.avatar, Profile.gamertag, likes_count, liked_by_me)
         .outerjoin(Profile, Profile.user_id == cast(Review.user_id, Uuid))
         .filter(Review.game_id == game_id, Review.text.is_not(None))
         .order_by(Review.updated_at.desc(), Review.id.desc())
@@ -140,12 +156,13 @@ def list_reviews(
     )
 
     reviews = []
-    for review, display_name, avatar, gamertag in rows:
+    for review, display_name, avatar, gamertag, count, liked in rows:
         item = ReviewOut.model_validate(review)
-        # Nome de exibição do perfil; sem ele, o nome guardado na review.
         item.author_name = (display_name or "").strip() or review.author_name
         item.author_avatar = avatar
         item.author_gamertag = gamertag
+        item.likes_count = int(count or 0)
+        item.liked_by_me = bool(liked)
         reviews.append(item)
     return reviews
 

@@ -82,6 +82,8 @@ export interface Review {
   author_gamertag: string | null;
   rating: number;
   text: string;
+  likes_count: number;
+  liked_by_me: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -113,6 +115,8 @@ export interface MyReviewItem {
   game: Game;
   rating: number;
   text: string;
+  likes_count: number;
+  liked_by_me: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -139,4 +143,19 @@ export async function listUserReviews(
 // Remove a review e a nota do usuário neste jogo.
 export async function deleteReview(id: string | number): Promise<void> {
   await api.delete(`/games/${id}/review`);
+}
+
+export interface ReviewLikeResponse {
+  liked: boolean;
+  likes_count: number;
+}
+
+export async function likeReview(reviewId: number): Promise<ReviewLikeResponse> {
+  const response = await api.post<ReviewLikeResponse>(`/reviews/${reviewId}/like`);
+  return response.data;
+}
+
+export async function unlikeReview(reviewId: number): Promise<ReviewLikeResponse> {
+  const response = await api.delete<ReviewLikeResponse>(`/reviews/${reviewId}/like`);
+  return response.data;
 }

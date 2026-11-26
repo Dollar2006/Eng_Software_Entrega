@@ -74,6 +74,7 @@ export default function PublicReviews({ gamertag }: Props) {
               <p className="line-clamp-4 text-sm leading-relaxed whitespace-pre-wrap text-neutral-700">
                 {item.text}
               </p>
+              <p className="text-xs text-neutral-500">{item.likes_count} curtidas</p>
             </div>
           </GameCard>
         ))}

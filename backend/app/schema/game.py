@@ -62,6 +62,8 @@ class ReviewOut(BaseModel):
     author_gamertag: str | None = None
     rating: int
     text: str
+    likes_count: int = 0
+    liked_by_me: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -72,5 +74,7 @@ class MyReviewOut(BaseModel):
     game: GameOut
     rating: int
     text: str
+    likes_count: int = 0
+    liked_by_me: bool = False
     created_at: datetime
     updated_at: datetime
