@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routers import auth, games, lists, profile, user_reviews, account, follows, feed
+from app.routers import auth, games, lists, profile, user_reviews, account, follows, feed, recommendation
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
@@ -10,3 +10,4 @@ api_router.include_router(feed.router)
 api_router.include_router(follows.router)
 api_router.include_router(lists.router)
 api_router.include_router(profile.router)
+api_router.include_router(recommendation.router)
