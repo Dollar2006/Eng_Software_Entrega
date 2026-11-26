@@ -124,6 +124,17 @@ export async function listMyReviews(offset = 0, limit = 12): Promise<MyReviewIte
   return response.data;
 }
 
+export async function listUserReviews(
+  gamertag: string,
+  offset = 0,
+  limit = 12,
+): Promise<MyReviewItem[]> {
+  const response = await api.get<MyReviewItem[]>(
+    `/users/${encodeURIComponent(gamertag)}/reviews?limit=${limit}&offset=${offset}`,
+  );
+  return response.data;
+}
+
 // Remove a review e a nota do usuário neste jogo.
 export async function deleteReview(id: string | number): Promise<void> {
   await api.delete(`/games/${id}/review`);

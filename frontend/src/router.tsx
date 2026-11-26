@@ -7,6 +7,7 @@ import LoginPage from '@/pages/LoginPage'
 import Bonfirehub from '@/pages/Bonfirehub'
 import GameDetailsPage from '@/pages/GameDetailsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
+import PublicProfilePage from '@/pages/PublicProfilePage'
 import PerfilPage from '@/pages/settings/PerfilPage'
 import SettingsLayout from '@/pages/settings/SettingsLayout'
 import ContaPage from '@/pages/settings/ContaPage'
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { path: 'cadastro', element: <CadastroPage /> },
       {path: 'bonfirehub', element: <Bonfirehub />},
+      { path: 'u/:gamertag', element: <PublicProfilePage /> },
       { path: 'conta', element: <ContaPage /> },
       {path: 'jogos/:id', element: <GameDetailsPage />},
       {
