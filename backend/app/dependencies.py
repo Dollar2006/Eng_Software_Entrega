@@ -1,4 +1,5 @@
 from functools import lru_cache
+from uuid import UUID
 
 from fastapi import Cookie, Depends, HTTPException
 
@@ -32,3 +33,12 @@ def get_current_user_optional(
         return auth.current_user(access_token)
     except AuthProviderError:
         return None
+
+
+def get_current_user_id(
+    user: dict[str, str] = Depends(get_current_user),
+) -> UUID:
+    try:
+        return UUID(user["id"])
+    except (KeyError, TypeError, ValueError) as error:
+        raise HTTPException(status_code=401, detail="Sessão inválida") from error

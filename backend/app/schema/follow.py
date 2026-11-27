@@ -18,3 +18,8 @@ class FollowUserOut(BaseModel):
     display_name: str | None = None
     avatar: str | None = None
     followed_at: datetime
+class UserSuggestionOut(BaseModel):
+    user_id: UUID
+    display_name: str | None = None
+    avatar: str | None = None
+    followers_count: int

@@ -10,7 +10,7 @@ from app.dependencies import get_current_user
 from app.models.auth_user import auth_users
 from app.models.follow import Follow
 from app.models.profile import Profile
-from app.schema.follow import FollowStatsOut, FollowStatusOut, FollowUserOut
+from app.schema.follow import FollowStatsOut, FollowStatusOut, FollowUserOut, UserSuggestionOut
 
 router = APIRouter(prefix="/users", tags=["follows"])
 
@@ -148,3 +148,33 @@ def list_following(
         .all()
     )
     return _to_items(rows)
+@router.get("/suggestions", response_model=list[UserSuggestionOut])
+def get_suggestions(
+    limit: int = Query(5, ge=1, le=20),
+    db: Session = Depends(get_db),
+    user: dict[str, str] = Depends(get_current_user),
+):
+    me = _current_user_id(user)
+
+    followers = (
+        select(Follow.followed_id.label("uid"), func.count().label("n"))
+        .group_by(Follow.followed_id)
+        .subquery()
+    )
+    count = func.coalesce(followers.c.n, 0)
+    already = select(Follow.followed_id).where(Follow.follower_id == me)
+
+    rows = (
+        db.query(Profile.user_id, Profile.display_name, Profile.avatar, count)
+        .outerjoin(followers, followers.c.uid == Profile.user_id)
+        .filter(Profile.user_id != me, ~Profile.user_id.in_(already))
+        .order_by(count.desc(), Profile.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        UserSuggestionOut(
+            user_id=uid, display_name=name, avatar=avatar, followers_count=n
+        )
+        for uid, name, avatar, n in rows
+    ]
