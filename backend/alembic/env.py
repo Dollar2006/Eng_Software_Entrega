@@ -11,7 +11,8 @@ from app.models.game import Game  # noqa: F401
 from app.models.profile import Profile  # noqa: F401
 from app.models.review import Review  # noqa: F401
 from app.models.list import List, ListItem  # noqa: F401
-from app.models.follow import Follow
+from app.models.follow import Follow  # noqa: F401
+from app.models.notification import Notification  # noqa: F401
 
 config = context.config
 
