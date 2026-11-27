@@ -156,6 +156,9 @@ export default function PerfilPage() {
 
                     <div className="min-w-0">
                       <p className="font-medium">{identity}</p>
+                      {profile.gamertag && (
+                        <p className="text-sm text-neutral-500">@{profile.gamertag}</p>
+                      )}
                       <p className="truncate text-sm text-neutral-500">{user.email}</p>
                     </div>
                   </div>

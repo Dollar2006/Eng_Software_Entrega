@@ -1,8 +1,7 @@
 from functools import lru_cache
+from uuid import UUID
 
 from fastapi import Cookie, Depends, HTTPException
-
-from uuid import UUID
 
 from app.services.supabase_auth import AuthProviderError, SupabaseAuthService
 
@@ -24,7 +23,7 @@ def get_current_user(
         raise HTTPException(status_code=error.status_code, detail=error.detail) from error
 
 
-def get_optional_current_user(
+def get_current_user_optional(
     access_token: str | None = Cookie(default=None),
     auth: SupabaseAuthService = Depends(get_auth_service),
 ) -> dict[str, str] | None:

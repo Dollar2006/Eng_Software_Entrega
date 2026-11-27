@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schema.game import GameOut
+
 
 class StatusIn(BaseModel):
     status: Literal["played", "want_to_play", "library"]
@@ -29,6 +31,13 @@ class ListItemOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     game_id: int
+    added_at: datetime
+
+
+class PublicListItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    game: GameOut
     added_at: datetime
 
 
