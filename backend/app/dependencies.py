@@ -31,8 +31,8 @@ def get_current_user_optional(
         return None
     try:
         return auth.current_user(access_token)
-    except AuthProviderError:
-        return None
+    except AuthProviderError as error:
+        raise HTTPException(status_code=error.status_code, detail=error.detail) from error
 
 
 def get_current_user_id(

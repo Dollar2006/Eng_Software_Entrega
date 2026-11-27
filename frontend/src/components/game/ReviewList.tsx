@@ -6,6 +6,7 @@ import StarsDisplay from '@/components/game/StarsDisplay'
 import Avatar from '@/components/profile/Avatar'
 import { Button } from '@/components/ui/button'
 import { hasSession } from '@/features/auth/requireSession'
+import { ApiError } from '@/lib/api'
 import { likeReview, listReviews, unlikeReview, type Review } from '@/lib/games'
 
 const PAGE_SIZE = 10
@@ -79,12 +80,16 @@ export default function ReviewList({ gameId, refreshKey = 0 }: ReviewListProps) 
     try {
       const res = nextLiked ? await likeReview(review.id) : await unlikeReview(review.id)
       setReviews((rs) => rs.map((r) => (r.id === review.id ? { ...r, ...res } : r)))
-    } catch {
+    } catch (error) {
       setReviews((rs) =>
         rs.map((r) =>
           r.id === review.id ? { ...r, liked_by_me: prev.liked, likes_count: prev.count } : r,
         ),
       )
+      if (error instanceof ApiError && error.status === 401) {
+        navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+        return
+      }
       setLikeError('Não foi possível atualizar a curtida.')
     } finally {
       setLikingIds((s) => {
