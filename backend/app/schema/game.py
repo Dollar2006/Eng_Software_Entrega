@@ -61,8 +61,17 @@ class ReviewOut(BaseModel):
     author_avatar: str | None = None
     rating: int
     text: str
+    likes: int = 0
+    liked_by_me: bool = False
+    is_own_review: bool = False
     created_at: datetime
     updated_at: datetime
+
+
+class ReviewLikeOut(BaseModel):
+    review_id: int
+    likes: int
+    liked_by_me: bool
 
 
 class MyReviewOut(BaseModel):

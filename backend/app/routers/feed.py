@@ -10,6 +10,7 @@ from app.models.follow import Follow
 from app.models.game import Game
 from app.models.profile import Profile
 from app.models.review import Review
+from app.models.review_like import ReviewLike
 from app.schema.feed import FeedItemOut
 
 router = APIRouter(prefix="/feed", tags=["feed"])
@@ -40,6 +41,7 @@ def get_feed(
             Game.cover_url,
             Profile.display_name,
             Profile.avatar,
+            ReviewLike.review_id,
         )
         .select_from(Review)
         # reviews.user_id é String; o cast fica do lado do follow para
@@ -47,6 +49,11 @@ def get_feed(
         .join(Follow, cast(Follow.followed_id, String) == Review.user_id)
         .join(Game, Game.id == Review.game_id)
         .outerjoin(Profile, Profile.user_id == Follow.followed_id)
+        .outerjoin(
+            ReviewLike,
+            (ReviewLike.review_id == Review.id)
+            & (ReviewLike.user_id == user["id"]),
+        )
         .filter(Follow.follower_id == me)
     )
     if only_reviews:
@@ -71,8 +78,10 @@ def get_feed(
             game_cover_url=cover_url,
             rating=review.rating,
             text=review.text,
+            likes=review.likes,
+            liked_by_me=liked_id is not None,
             created_at=review.created_at,
             updated_at=review.updated_at,
         )
-        for review, author_id, game_name, cover_url, display_name, avatar in rows
+        for review, author_id, game_name, cover_url, display_name, avatar, liked_id in rows
     ]

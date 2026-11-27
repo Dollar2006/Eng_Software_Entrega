@@ -71,7 +71,11 @@ function FeedCard({ item }: { item: FeedItem }) {
         )}
         {item.text && (
           <div className="mt-2">
-            <ReviewLikeButton reviewId={item.review_id} />
+            <ReviewLikeButton
+              reviewId={item.review_id}
+              likes={item.likes}
+              likedByMe={item.liked_by_me}
+            />
           </div>
         )}
       </div>

@@ -4,10 +4,11 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_optional_current_user
 from app.models.game import Game
 from app.models.profile import Profile  # ajuste ao arquivo real do model
 from app.models.review import Review
+from app.models.review_like import ReviewLike
 from app.schema.game import (
     FiltersOut,
     GameDetailOut,
@@ -125,6 +126,7 @@ def list_reviews(
     limit: int = Query(10, ge=1, le=50),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
+    user: dict[str, str] | None = Depends(get_optional_current_user),
 ):
     _ensure_game_exists(db, game_id)
 
@@ -139,12 +141,26 @@ def list_reviews(
         .all()
     )
 
+    liked_review_ids: set[int] = set()
+    user_id = user["id"] if user else None
+    if user_id and rows:
+        liked_review_ids = set(
+            db.scalars(
+                select(ReviewLike.review_id).where(
+                    ReviewLike.user_id == user_id,
+                    ReviewLike.review_id.in_([review.id for review, _, _ in rows]),
+                )
+            ).all()
+        )
+
     reviews = []
     for review, display_name, avatar in rows:
         item = ReviewOut.model_validate(review)
         # Nome de exibição do perfil; sem ele, o nome guardado na review.
         item.author_name = (display_name or "").strip() or review.author_name
         item.author_avatar = avatar
+        item.liked_by_me = review.id in liked_review_ids
+        item.is_own_review = review.user_id == user_id if user_id else False
         reviews.append(item)
     return reviews
 

@@ -10,6 +10,8 @@ export interface FeedItem {
   game_cover_url: string | null;
   rating: number;
   text: string | null;
+  likes: number;
+  liked_by_me: boolean;
   created_at: string;
   updated_at: string;
 }

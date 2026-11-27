@@ -109,7 +109,12 @@ export default function ReviewList({ gameId, refreshKey = 0 }: ReviewListProps) 
                 </p>
 
                 <div className="mt-3 flex justify-end">
-                  <ReviewLikeButton reviewId={review.id} />
+                  <ReviewLikeButton
+                    reviewId={review.id}
+                    likes={review.likes}
+                    likedByMe={review.liked_by_me}
+                    isOwnReview={review.is_own_review}
+                  />
                 </div>
               </div>
             </li>

@@ -28,7 +28,7 @@ class Review(Base):
         Integer, ForeignKey("games.id", ondelete="CASCADE"), nullable=False, index=True
     )
     rating = Column(SmallInteger, nullable=False)
-    likes = Column(SmallInteger,nullable=False, server_default="0")
+    likes = Column(Integer, nullable=False, server_default="0")
    
     text = Column(Text)
     author_name = Column(String(100))

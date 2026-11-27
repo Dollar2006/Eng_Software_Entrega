@@ -14,5 +14,7 @@ class FeedItemOut(BaseModel):
     game_cover_url: str | None = None
     rating: int
     text: str | None = None
+    likes: int = 0
+    liked_by_me: bool = False
     created_at: datetime
     updated_at: datetime
