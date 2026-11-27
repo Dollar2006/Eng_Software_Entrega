@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -33,6 +34,18 @@ def _get_or_create(db: Session, user_id: UUID) -> Profile:
     return profile
 
 
+def _ensure_gamertag_available(db: Session, gamertag: str | None, user_id: UUID) -> None:
+    if gamertag is None:
+        return
+    taken = (
+        db.query(Profile.user_id)
+        .filter(func.lower(Profile.gamertag) == gamertag.lower(), Profile.user_id != user_id)
+        .first()
+    )
+    if taken is not None:
+        raise HTTPException(status_code=409, detail="Essa gamertag já está em uso.")
+
+
 @router.get("", response_model=ProfileOut)
 def get_my_profile(
     user: dict[str, str] = Depends(get_current_user),
@@ -47,7 +60,10 @@ def update_my_profile(
     user: dict[str, str] = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    profile = _get_or_create(db, _current_user_id(user))
+    uid = _current_user_id(user)
+    _ensure_gamertag_available(db, payload.gamertag, uid)
+    profile = _get_or_create(db, uid)
+    profile.gamertag = payload.gamertag or None
     profile.display_name = payload.display_name or None
     profile.bio = payload.bio or None
     profile.avatar = payload.avatar

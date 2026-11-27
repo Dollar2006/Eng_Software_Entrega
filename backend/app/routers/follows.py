@@ -11,6 +11,7 @@ from app.models.auth_user import auth_users
 from app.models.follow import Follow
 from app.models.profile import Profile
 from app.schema.follow import FollowStatsOut, FollowStatusOut, FollowUserOut, UserSuggestionOut
+from app.services.notifications import FollowCreated, get_notification_dispatcher
 
 router = APIRouter(prefix="/users", tags=["follows"])
 
@@ -46,9 +47,15 @@ def follow_user(
         insert(Follow)
         .values(follower_id=me, followed_id=user_id)
         .on_conflict_do_nothing()
+        .returning(Follow.followed_id)
     )
-    db.execute(stmt)
+    inserted = db.execute(stmt).first()
     db.commit()
+
+    if inserted is not None:
+        get_notification_dispatcher().notify(
+            FollowCreated(actor_id=me, recipient_id=user_id), db
+        )
 
 
 @router.delete("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT)

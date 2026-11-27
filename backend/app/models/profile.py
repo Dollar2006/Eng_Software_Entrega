@@ -11,6 +11,7 @@ class Profile(Base):
         ForeignKey("auth.users.id", ondelete="CASCADE"),
         primary_key=True,
     )
+    gamertag = Column(String(30), nullable=True)
     display_name = Column(String(50))
     bio = Column(String(280))
     avatar = Column(Text)

@@ -20,7 +20,16 @@ export async function requireSession({
       const from = new URL(request.url).pathname
       throw redirect(`/login?redirect=${encodeURIComponent(from)}`)
     }
-    
+
     throw error
+  }
+}
+
+export async function hasSession(): Promise<SessionData | null> {
+  try {
+    const user = await getCurrentUser()
+    return { user }
+  } catch {
+    return null
   }
 }

@@ -8,6 +8,7 @@ export type AuthUser = {
 export type RegisterPayload = {
   email: string
   password: string
+  gamertag?: string | null
 }
 
 export type RegisterResponse = {

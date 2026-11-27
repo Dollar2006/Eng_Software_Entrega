@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { Game } from "@/lib/games";
 
 export type ListRef = {
   id: number;
@@ -8,6 +9,11 @@ export type ListRef = {
 
 export type ListItem = {
   game_id: number;
+  added_at: string;
+};
+
+export type PublicListItem = {
+  game: Game;
   added_at: string;
 };
 
@@ -34,6 +40,23 @@ export async function updateCustomList(listId: number, name: string): Promise<Li
 
 export async function getListItems(listId: number): Promise<ListItem[]> {
   const response = await api.get<ListItem[]>(`/users/me/lists/${listId}/items`);
+  return response.data;
+}
+
+export async function getPublicLists(gamertag: string): Promise<ListRef[]> {
+  const response = await api.get<{ lists: ListRef[] }>(
+    `/users/${encodeURIComponent(gamertag)}/lists`,
+  );
+  return response.data.lists;
+}
+
+export async function getPublicListItems(
+  gamertag: string,
+  listId: number,
+): Promise<PublicListItem[]> {
+  const response = await api.get<PublicListItem[]>(
+    `/users/${encodeURIComponent(gamertag)}/lists/${listId}/items`,
+  );
   return response.data;
 }
 
