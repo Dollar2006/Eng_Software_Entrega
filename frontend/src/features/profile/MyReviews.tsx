@@ -174,6 +174,8 @@ export default function MyReviews() {
                       {item.text}
                     </p>
 
+                    <p className="text-xs text-neutral-500">{item.likes_count} curtidas</p>
+
                     {isConfirming ? (
                       <div className="space-y-2">
                         <p className="text-sm">

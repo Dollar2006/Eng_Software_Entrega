@@ -28,10 +28,9 @@ class Review(Base):
         Integer, ForeignKey("games.id", ondelete="CASCADE"), nullable=False, index=True
     )
     rating = Column(SmallInteger, nullable=False)
-    # REQ-08: texto da review. NULL = o usuário só deu nota (REQ-07).
+    likes = Column(Integer, nullable=False, server_default="0")
+   
     text = Column(Text)
-    # Nome exibido ao lado da review. Guardado na hora de escrever porque o
-    # perfil (nome de exibição) ainda não existe no backend.
     author_name = Column(String(100))
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

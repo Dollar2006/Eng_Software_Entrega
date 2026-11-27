@@ -60,7 +60,7 @@ export function GameDetailsPage() {
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
       <div className="mx-auto max-w-4xl px-6 py-12">
         <Link
-          to="/bonfirehub"
+          to="/"
           className="text-sm text-neutral-500 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-neutral-900"
         >
           ← Voltar para os jogos

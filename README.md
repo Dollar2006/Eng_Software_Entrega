@@ -358,6 +358,8 @@ A documentação interativa (Swagger) fica em `http://localhost:8000/docs` com a
 | GET | `/games/filters` | Público | Gêneros e plataformas existentes |
 | GET | `/games/{id}` | Público | Detalhes do jogo, com média das notas |
 | GET | `/games/{id}/reviews` | Público | Reviews da comunidade, com foto e nome do autor |
+| POST | `/reviews/{review_id}/like` | Login | Curte uma review de outro usuário |
+| DELETE | `/reviews/{review_id}/like` | Login | Remove a curtida de uma review |
 | GET | `/games/{id}/rating/me` | Login | Nota e review do usuário neste jogo |
 | PUT | `/games/{id}/rating` | Login | Define ou altera a nota (1 a 5) |
 | PUT | `/games/{id}/review` | Login | Publica ou atualiza a review |

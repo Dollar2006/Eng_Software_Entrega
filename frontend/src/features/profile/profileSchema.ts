@@ -1,8 +1,19 @@
 import { z } from 'zod'
 
 export const BIO_MAX_LENGTH = 280
+export const GAMERTAG_RE = /^[a-zA-Z0-9_.]{3,30}$/
 
 export const profileSchema = z.object({
+    gamertag: z
+        .string()
+        .trim()
+        .max(30, 'A gamertag deve ter no máximo 30 caracteres.')
+        .refine((value) => value.length === 0 || GAMERTAG_RE.test(value), {
+            message: 'A gamertag deve ter 3-30 caracteres: letras, números, _ ou .',
+        })
+        .refine((value) => value.toLowerCase() !== 'me', {
+            message: 'Essa gamertag não está disponível.',
+        }),
     displayName: z
         .string()
         .trim()

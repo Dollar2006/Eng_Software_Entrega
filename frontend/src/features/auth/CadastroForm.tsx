@@ -30,7 +30,7 @@ export default function CadastroForm() {
     formState: { errors, isSubmitting },
   } = useForm<CadastroFormValues>({
     resolver: zodResolver(cadastroSchema),
-    defaultValues: { email: '', password: '', confirmPassword: '' },
+    defaultValues: { gamertag: '', email: '', password: '', confirmPassword: '' },
   })
 
   async function onSubmit(values: CadastroFormValues) {
@@ -40,6 +40,7 @@ export default function CadastroForm() {
       const result = await registerAccount({
         email: values.email,
         password: values.password,
+        gamertag: values.gamertag.trim() || null,
       })
 
       if (result.email_confirmation_required) {
@@ -58,14 +59,15 @@ export default function CadastroForm() {
       let handled = false
 
       for (const [field, message] of Object.entries(error.fieldErrors)) {
-        if (field === 'email' || field === 'password') {
+        if (field === 'email' || field === 'password' || field === 'gamertag') {
           setError(field, { message })
           handled = true
         }
       }
 
       if (!handled && error.status === 409) {
-        setError('email', { message: error.message })
+        const target = error.message.toLowerCase().includes('gamertag') ? 'gamertag' : 'email'
+        setError(target, { message: error.message })
         handled = true
       }
 
@@ -99,6 +101,23 @@ export default function CadastroForm() {
           <AlertDescription>{submitError}</AlertDescription>
         </Alert>
       )}
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="gamertag">Gamertag (opcional)</Label>
+        <Input
+          id="gamertag"
+          type="text"
+          autoComplete="nickname"
+          placeholder="seu_nome"
+          aria-invalid={errors.gamertag ? true : undefined}
+          aria-describedby={errors.gamertag ? 'gamertag-error gamertag-help' : 'gamertag-help'}
+          {...register('gamertag')}
+        />
+        <p id="gamertag-help" className="text-xs text-muted-foreground">
+          3-30 caracteres: letras, números, _ ou . Você pode definir depois.
+        </p>
+        <FieldError id="gamertag-error" message={errors.gamertag?.message} />
+      </div>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">E-mail</Label>

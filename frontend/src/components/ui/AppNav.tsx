@@ -1,15 +1,17 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import {
   IconDeviceGamepad2,
   IconLogin2,
   IconLogout,
+  IconHome,
   IconMenu2,
   IconUserCircle,
   IconX,
 } from '@tabler/icons-react'
 
 import { Button } from '@/components/ui/button'
+import NotificationBell from '@/components/ui/NotificationBell'
 import {
   getCurrentUser,
   logoutAccount,
@@ -18,6 +20,7 @@ import {
 import { cn } from '@/lib/utils'
 
 const navItems = [
+  { label: 'Início', to: '/', icon: IconHome, end: true },
   { label: 'Jogos', to: '/bonfirehub', icon: IconDeviceGamepad2 },
   { label: 'Perfil', to: '/settings/perfil', icon: IconUserCircle },
 ]
@@ -29,9 +32,14 @@ export default function AppNav() {
   const [user, setUser] = useState<AuthUser | null | undefined>(undefined)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
+  useEffect(() => {
+    getCurrentUser()
+      .then(setUser)
+      .catch(() => setUser(null))
+  }, [])
+
   function openMenu() {
     dialogRef.current?.showModal()
-    // A sessão só é consultada quando o menu abre, não ao carregar a página.
     getCurrentUser()
       .then(setUser)
       .catch(() => setUser(null))
@@ -67,9 +75,10 @@ export default function AppNav() {
         >
           <IconMenu2 className="size-5" />
         </Button>
-        <Link to="/bonfirehub" className="font-semibold tracking-tight">
+        <Link to="/" className="font-semibold tracking-tight">
           Bonfire
         </Link>
+        <div className="ml-auto">{user ? <NotificationBell /> : null}</div>
       </header>
 
       <dialog

@@ -59,10 +59,19 @@ class ReviewOut(BaseModel):
     author_name: str | None = None
     # Foto do perfil do autor (a mesma do /users/me/profile); null = sem foto.
     author_avatar: str | None = None
+    author_gamertag: str | None = None
     rating: int
     text: str
+    likes_count: int = 0
+    liked_by_me: bool = False
     created_at: datetime
     updated_at: datetime
+
+
+class ReviewLikeOut(BaseModel):
+    review_id: int
+    likes: int
+    liked_by_me: bool
 
 
 class MyReviewOut(BaseModel):
@@ -71,5 +80,7 @@ class MyReviewOut(BaseModel):
     game: GameOut
     rating: int
     text: str
+    likes_count: int = 0
+    liked_by_me: bool = False
     created_at: datetime
     updated_at: datetime

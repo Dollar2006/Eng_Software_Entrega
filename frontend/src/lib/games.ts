@@ -79,8 +79,11 @@ export interface Review {
   id: number;
   author_name: string | null;
   author_avatar: string | null;
+  author_gamertag: string | null;
   rating: number;
   text: string;
+  likes_count: number;
+  liked_by_me: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -91,11 +94,10 @@ export async function listReviews(
   offset = 0,
   limit = 10,
 ): Promise<Review[]> {
-  const res = await fetch(
-    `${API_URL}/games/${id}/reviews?limit=${limit}&offset=${offset}`,
-  );
-  if (!res.ok) throw new Error("Erro ao buscar reviews");
-  return res.json();
+  const response = await api.get<Review[]>(`/games/${id}/reviews`, {
+    params: { limit, offset },
+  });
+  return response.data;
 }
 
 // Publica (ou atualiza) a review do usuário junto com a nota.
@@ -112,6 +114,8 @@ export interface MyReviewItem {
   game: Game;
   rating: number;
   text: string;
+  likes_count: number;
+  liked_by_me: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -124,7 +128,33 @@ export async function listMyReviews(offset = 0, limit = 12): Promise<MyReviewIte
   return response.data;
 }
 
+export async function listUserReviews(
+  gamertag: string,
+  offset = 0,
+  limit = 12,
+): Promise<MyReviewItem[]> {
+  const response = await api.get<MyReviewItem[]>(
+    `/users/${encodeURIComponent(gamertag)}/reviews?limit=${limit}&offset=${offset}`,
+  );
+  return response.data;
+}
+
 // Remove a review e a nota do usuário neste jogo.
 export async function deleteReview(id: string | number): Promise<void> {
   await api.delete(`/games/${id}/review`);
+}
+
+export interface ReviewLikeResponse {
+  liked: boolean;
+  likes_count: number;
+}
+
+export async function likeReview(reviewId: number): Promise<ReviewLikeResponse> {
+  const response = await api.post<ReviewLikeResponse>(`/reviews/${reviewId}/like`);
+  return response.data;
+}
+
+export async function unlikeReview(reviewId: number): Promise<ReviewLikeResponse> {
+  const response = await api.delete<ReviewLikeResponse>(`/reviews/${reviewId}/like`);
+  return response.data;
 }
