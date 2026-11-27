@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func
@@ -8,6 +10,7 @@ from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models.review import Review
 from app.models.review_like import ReviewLike
+from app.services.notifications import ReviewLiked, get_notification_dispatcher
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -37,14 +40,27 @@ def like_review(
     db: Session = Depends(get_db),
     user: dict[str, str] = Depends(get_current_user),
 ):
-    _ensure_review_exists(db, review_id)
+    review = db.get(Review, review_id)
+    if review is None:
+        raise HTTPException(status_code=404, detail="Review não encontrada")
+
     stmt = (
         insert(ReviewLike)
         .values(user_id=user["id"], review_id=review_id)
         .on_conflict_do_nothing(constraint="pk_review_likes")
+        .returning(ReviewLike.review_id)
     )
-    db.execute(stmt)
+    inserted = db.execute(stmt).first()
     db.commit()
+
+    actor_id = UUID(user["id"])
+    recipient_id = UUID(str(review.user_id))
+    if inserted is not None and actor_id != recipient_id:
+        get_notification_dispatcher().notify(
+            ReviewLiked(actor_id=actor_id, recipient_id=recipient_id, review_id=review_id),
+            db,
+        )
+
     return {"liked": True, "likes_count": _likes_count(db, review_id)}
 
 
