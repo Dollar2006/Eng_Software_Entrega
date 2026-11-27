@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router";
 import FeaturedCarousel from "@/components/game/FeaturedCarousel";
 import RightRail from "@/components/ui/RightRail";
 import UserAvatar from "@/components/profile/UserAvatar";
+import ReviewLikeButton from "@/components/reviews/ReviewLikeButton";
 import { ApiError } from "@/lib/api";
 import { getFeed, type FeedItem } from "@/lib/feed";
 
@@ -67,6 +68,11 @@ function FeedCard({ item }: { item: FeedItem }) {
         </p>
         {item.text && (
           <p className="mt-2 whitespace-pre-line text-sm">{item.text}</p>
+        )}
+        {item.text && (
+          <div className="mt-2">
+            <ReviewLikeButton reviewId={item.review_id} />
+          </div>
         )}
       </div>
 
