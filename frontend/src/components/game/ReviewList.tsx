@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import StarsDisplay from '@/components/game/StarsDisplay'
 import Avatar from '@/components/profile/Avatar'
 import { Button } from '@/components/ui/button'
+import ReviewLikeButton from '@/components/reviews/ReviewLikeButton'
 import { listReviews, type Review } from '@/lib/games'
 
 const PAGE_SIZE = 10
@@ -106,6 +107,15 @@ export default function ReviewList({ gameId, refreshKey = 0 }: ReviewListProps) 
                 <p className="mt-3 text-sm leading-relaxed whitespace-pre-wrap text-neutral-700">
                   {review.text}
                 </p>
+
+                <div className="mt-3 flex justify-end">
+                  <ReviewLikeButton
+                    reviewId={review.id}
+                    likes={review.likes}
+                    likedByMe={review.liked_by_me}
+                    isOwnReview={review.is_own_review}
+                  />
+                </div>
               </div>
             </li>
           )

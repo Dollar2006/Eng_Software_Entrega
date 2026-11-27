@@ -10,7 +10,9 @@ from app.models.auth_user import auth_users  # noqa: F401
 from app.models.game import Game  # noqa: F401
 from app.models.profile import Profile  # noqa: F401
 from app.models.review import Review  # noqa: F401
+from app.models.review_like import ReviewLike  # noqa: F401
 from app.models.list import List, ListItem  # noqa: F401
+from app.models.follow import Follow
 
 config = context.config
 

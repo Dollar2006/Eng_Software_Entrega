@@ -81,6 +81,9 @@ export interface Review {
   author_avatar: string | null;
   rating: number;
   text: string;
+  likes: number;
+  liked_by_me: boolean;
+  is_own_review: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -91,11 +94,10 @@ export async function listReviews(
   offset = 0,
   limit = 10,
 ): Promise<Review[]> {
-  const res = await fetch(
-    `${API_URL}/games/${id}/reviews?limit=${limit}&offset=${offset}`,
-  );
-  if (!res.ok) throw new Error("Erro ao buscar reviews");
-  return res.json();
+  const response = await api.get<Review[]>(`/games/${id}/reviews`, {
+    params: { limit, offset },
+  });
+  return response.data;
 }
 
 // Publica (ou atualiza) a review do usuário junto com a nota.

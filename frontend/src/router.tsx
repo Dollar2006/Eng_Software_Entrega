@@ -2,9 +2,9 @@ import { createBrowserRouter, Navigate } from 'react-router'
 import App from '@/App'
 import CadastroPage from '@/pages/CadastroPage'
 import ErrorPage from '@/pages/ErrorPage'
-import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import Bonfirehub from '@/pages/Bonfirehub'
+import Feed from '@/pages/Feed'
 import GameDetailsPage from '@/pages/GameDetailsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import PerfilPage from '@/pages/settings/PerfilPage'
@@ -18,7 +18,7 @@ export const router = createBrowserRouter([
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <Feed />, loader: requireSession },
       { path: 'login', element: <LoginPage /> },
       { path: 'cadastro', element: <CadastroPage /> },
       {path: 'bonfirehub', element: <Bonfirehub />},

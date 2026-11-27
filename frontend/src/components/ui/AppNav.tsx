@@ -4,6 +4,7 @@ import {
   IconDeviceGamepad2,
   IconLogin2,
   IconLogout,
+  IconHome,
   IconMenu2,
   IconUserCircle,
   IconX,
@@ -18,6 +19,7 @@ import {
 import { cn } from '@/lib/utils'
 
 const navItems = [
+  { label: 'Início', to: '/', icon: IconHome, end: true },
   { label: 'Jogos', to: '/bonfirehub', icon: IconDeviceGamepad2 },
   { label: 'Perfil', to: '/settings/perfil', icon: IconUserCircle },
 ]
@@ -67,7 +69,7 @@ export default function AppNav() {
         >
           <IconMenu2 className="size-5" />
         </Button>
-        <Link to="/bonfirehub" className="font-semibold tracking-tight">
+        <Link to="/" className="font-semibold tracking-tight">
           Bonfire
         </Link>
       </header>
